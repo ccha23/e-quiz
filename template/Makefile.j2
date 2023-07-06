@@ -48,6 +48,10 @@ delete:
 	@echo "Deleting $(release) from $(namespace)..."
 	microk8s helm delete -n $(namespace) $(release) --wait
 
+# Cleanup
+clean: rm.up rm.namespace
+	@echo "Cleaning up..."
+
 # -------------------------------------------------------------
 # Test docker images with docker compose
 
