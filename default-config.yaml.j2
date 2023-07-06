@@ -1,0 +1,181 @@
+# *** IMPORTANT ***
+#
+#   - Change the secrets to your own secrets before deployment. 
+#   - Do not push config.yaml.j2 or ./dist/values.yaml to a public repository. 
+#     By default, ./config.yaml.j2 and ./dist are git-ignored using the .gitignore file. 
+#   - YAML anchor such as &MYPASS is used to avoid inconsistent values.
+#     E.g., phpfpminit app uses the same password MYPASS to access the mariadb app configured to use 
+#      - MYSQL_PASSWORD as the password for the moodle user (database) and 
+#      - MYSQL_ROOT_PASSWORD as the root password.
+# NOTE:
+#   - You may add additional variables for custom built images that recognize them.
+#   - Be careful of name conflicts as the values here can be overriden by those set 
+#     for any variables of the same name in other ways such as env in container spec.
+secret:
+  # Sensitive information passed to different apps as environment variables using 
+  # envFrom of the container spec.
+  # Template:
+  #   { app name }:
+  #     { variable name }: { string value }
+  phpfpminit:
+    ADMINPASS: 'Admin.1234'
+    DBPASS: &DBPASS 'yourpassword'
+    UPGRADEKEY: ''
+  mariadb:
+    MYSQL_ROOT_PASSWORD: *DBPASS
+    MYSQL_PASSWORD: *DBPASS
+
+{%- set protocol = 'http' %}                   # 'http' or 'https' (TODO: link to setup instructions for self-signed or lets-encrypt cert for kubernetes. See acme and myca folders.)
+{%- set host = 'localhost' %}                  # replace by the actual host name. (TODO: link to setup instructions for ingress in values.yaml file.)
+{%- set port = '' %}                           # (TODO: test if other ports such as 8181 actually works, and add appropriate instructions.)
+{%- set namespace = 'equiz' %}                 # Namespace for helm deployment of equiz to identify related resources.
+{%- set release = 'default' %}                 # Release name for helm deployment to identify related resources for different releases in the same namespace. 
+                                               # (TODO: Support multiple helm deployments to the same namespace by attaching .Release.Name to services like mariadb, phpfpm, maximapool...)
+{%- set route = '/'+namespace -%}              # Must must a valid path starting with '/' mapped to the external base URL.
+{%- set registry ='localhost:32000' %}         # Used by docker to store custom built docker images for equiz so the kubernetes can pull from it. Default to the private registry accessible by kubernetes. (TODO: link to setup instructions that enable private registry.)
+namespace: {{ namespace }}
+release: {{ release }}
+host: {{ host }}
+port: {{ port }}
+route: {{ route }}
+registry: {{ registry.rstrip('/') }}
+proxy_body_size: 200M                           # maximum allowed size of the request body
+
+# Information passed to different apps as environment variables using
+# envFrom of the container spec.
+env:
+  phpfpminit:
+    ADMINUSER: admin
+    DBUSER: &DBUSER moodleuser
+    ADMINEMAIL: ''
+    SUPPORTEMAIL: ''
+    WWWROOT: "{{ protocol }}://{{ host }}{% if port -%}:{{ port }}{%- endif %}{{ route }}"
+    DATAROOT: '/var/www/moodledata'
+    DBTYPE: mariadb
+    DBHOST: mariadb
+    DBNAME: &DBNAME moodle
+    DBPORT: '3306'
+    DBSOCKET: '/var/run/mysqld/mysqld.sock'
+    SITEPRESET: ''
+    PREFIX: 'mdl_'
+    FULLNAME: 'E-Quiz'
+    SHORTNAME: {{ namespace }}
+    SUMMARY: 'E-Quiz for Programmable Online Exam.'
+  mariadb:
+    MYSQL_USER: *DBUSER
+    MYSQL_DATABASE: *DBNAME
+
+# Settings for installing/configuring moodle plugins.
+# These are used to build docker images to initialize moodle.
+# (TODO: link to the instructions for building/using equiz images)
+plugins:
+  # Named plugins recognized by equiz to initialize . (TODO: link to setup instructions for adding named plugins.)
+  # Template:
+  # ( plugin_name ):
+  #   enable: ( true or false: whether to enable the plugin. )
+  #   (TODO: other configurations.)
+  forcedcache:
+    enable: false
+  coderunner:
+    enable: false
+  stack:
+    enable: false
+  # Extra commands to install other plugins. (TODO: link to the instructions for adding other plugins.)
+  extra: ""
+
+# Settings for the database server for moodle
+mariadb:
+  image: 
+    repository: mariadb
+    tag: 10.8.4
+  resources:
+    limits:
+      cpu: 4
+      memory: 4Gi
+    requests:
+      cpu: 1
+      memory: 1Gi
+
+# Settings for the web server for moodle
+nginx:
+  image: 
+    repository: nginx
+    tag: 1.25-alpine3.17
+  resources:
+    limits:
+      cpu: 4
+      memory: 4Gi
+    requests:
+      cpu: 1
+      memory: 1Gi
+
+# Settings for the php engine for moodle
+phpfpm:
+  image: 
+    repository: {{ registry }}/{{ namespace }}_phpfpm
+    tag: latest
+  resources:
+    limits:
+      cpu: 4
+      memory: 4Gi
+    requests:
+      cpu: 1
+      memory: 1Gi
+
+# Settings for the debug app
+debug:
+  enabled: false
+  image:
+    repository: {{ registry }}/{{ namespace }}_html
+    tag: latest
+    pullPolicy: Always
+  resources:
+    limits:
+      cpu: 1
+      memory: 4Gi
+    requests:
+      cpu: 1
+      memory: 1Gi
+
+global:
+  # To use existing PVCs
+  existingPvc:
+    html: ""
+    moodledata: ""
+    mysql: ""
+  htmlInitImage: {{ registry }}/{{ namespace }}_html
+  phpfpminitImage: {{ registry }}/{{ namespace }}_phpfpminit
+
+# PVCs to be created by helm upgrade of equiz, if global.existingPvc is not specified.
+pvc:
+  html:
+    storageClassName: microk8s-hostpath
+    accessMode: ReadWriteOnce
+    size: 4G
+  moodledata:
+    storageClassName: microk8s-hostpath
+    accessMode: ReadWriteOnce
+    size: 4G
+  mysql:
+    storageClassName: microk8s-hostpath
+    accessMode: ReadWriteOnce
+    size: 4G
+
+# Configuration file contents
+etc:
+  mycnf: ""
+  php: ""
+  phpfpm: ""
+  nginx: ""
+  nginxSite: ""
+
+# Docker-compose setting for the setup/test environment.
+# (TODO: link to the instructions for setting up/testing equiz with docker-compose.)
+{%- set dc = { 'protocol': 'http', 'host': 'localhost', 'port': '8080' } %}
+dc:
+  protocol: {{ dc['protocol'] }} 
+  host: {{ dc['host'] }}
+  port: {{ dc['port'] }}
+  env:
+    phpfpminit:
+      WWWROOT: "{{ dc['protocol'] }}://{{ dc['host'] }}{% if dc['port'] -%}:{{ dc['port'] }}{%- endif %}"

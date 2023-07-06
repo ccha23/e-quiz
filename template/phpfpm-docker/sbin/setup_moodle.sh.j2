@@ -1,0 +1,85 @@
+#!/bin/sh
+
+set -eux
+
+su -s /bin/sh www-data <<'EOF'
+
+php /var/www/html/admin/cli/install.php \
+    --chmod=2770            \
+    --lang=en       \
+    --wwwroot="${WWWROOT}"    \
+    --dataroot="${DATAROOT}"  \
+    --dbtype="${DBTYPE}"  \
+    --dbhost="${DBHOST}"  \
+    --dbname="${DBNAME}"  \
+    --dbuser="${DBUSER}"  \
+    --dbpass="${DBPASS}"  \
+    --dbport="${DBPORT}"  \
+    --dbsocket="${DBSOCKET}"  \
+    --sitepreset="${SITEPRESET}"  \
+    --prefix="${PREFIX}"  \
+    --fullname="${FULLNAME}"  \
+    --shortname="${SHORTNAME}"    \
+    --summary="${SUMMARY}"    \
+    --adminuser="${ADMINUSER}"    \
+    --adminpass="${ADMINPASS}"    \
+    --adminemail="${ADMINEMAIL}"  \
+    --supportemail="${SUPPORTEMAIL}"  \
+    --upgradekey="${UPGRADEKEY}"  \
+    --non-interactive           \
+    --agree-license             \
+    --allow-unstable
+
+# content to insert
+content=$(cat <<'EEOF'
+
+# Additional Moodle configurations
+
+# X-Sendfile feature
+$CFG->xsendfile = 'X-Accel-Redirect';
+$CFG->xsendfilealiases = array(
+#    '/dataroot/' => $CFG->dataroot,
+#    '/cachedir/' => $CFG->dataroot . '/cache',            // for custom $CFG->cachedir locations
+#    '/localcachedir/' => $CFG->dataroot . '/localcache',  // for custom $CFG->localcachedir locations
+#    '/tempdir/'  => $CFG->dataroot . '/temp',             // for custom $CFG->tempdir locations
+#    '/filedir'   => $CFG->dataroot . '/fildir',             // for custom $CFG->filedir locations
+);
+
+{% with p = plugins -%}
+{% if p['forcedcache']['enable'] -%}
+# Forced Cache
+# See https://github.com/catalyst/moodle-tool_forcedcache#configuration
+$CFG->tool_forcedcache_config_path = '/var/www/eqconfig/config.json';
+$CFG->alternative_cache_factory_class = 'tool_forcedcache_cache_factory';
+{%- endif %}
+{%- endwith %}
+
+# Support reverse proxy
+$CFG->reverseproxy = true;
+
+EEOF
+)
+
+if echo ${WWWROOT} | grep -q "^[[:space:]]*https://"; then
+  content="$content\n# Support SSL proxy\n"'$CFG->sslproxy = true;'"\n\n"
+fi
+
+# Find the last line that matches the PHP command
+last_match=$(grep -n "\s*require_once\s*(\s*__DIR__\s*\.\s*'/lib/setup.php'\s*)\s*;\s*" /var/www/html/config.php | tail -n 1 | cut -d ':' -f 1)
+
+# Check if there is a match
+if [ -n "$last_match" ]; then
+  # Calculate the line number to insert the new line
+  insert_line=$(expr $last_match - 1)
+
+  # Insert the new content
+  awk -v insert_line=${insert_line} -v content="$content" 'NR==insert_line{print content}1' /var/www/html/config.php > /tmp/config.php && mv /tmp/config.php /var/www/html/config.php
+fi
+
+# Create a default course
+# php /var/www/html/admin/cli/restore_backup.php --file=/var/www/eqconfig/course.mbz --categoryid=1
+
+# Purge caches
+# php /var/www/html/admin/cli/purge_caches.php
+
+EOF

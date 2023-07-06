@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "equiz.release" . }}-etc
+  labels:
+    {{- include "equiz.labels" . | nindent 4 }}
+data:
+  my.cnf: |-
+    {{- if .Values.etc.mycnf }}
+    {{- .Values.etc.mycnf | nindent 4 }}
+    {{- else }}
+    {{- .Files.Get "etc/my.cnf" | nindent 4 }}
+    {{- end }}
+  php-fpm.conf: |-
+    {{- if .Values.etc.phpfpm }}
+    {{- .Values.etc.phpfpm | nindent 4 }}
+    {{- else }}
+    {{- .Files.Get "etc/php-fpm.conf" | nindent 4 }}
+    {{- end }}
+  php.ini: |-
+    {{- if .Values.etc.php }}
+    {{- .Values.etc.php | nindent 4 }}
+    {{- else }}
+    {{- .Files.Get "etc/php.ini" | nindent 4 }}
+    {{- end }}
+  nginx.conf: |-
+    {{- if .Values.etc.nginx }}
+    {{- .Values.etc.nginx | nindent 4 }}
+    {{- else }}
+    {{- .Files.Get "etc/nginx.conf" | nindent 4 }}
+    {{- end }}
+  nginx-site.conf: |-
+    {{- if .Values.etc.nginxSite }}
+    {{- .Values.etc.nginxSite | nindent 4 }}
+    {{- else }}
+    {{- .Files.Get "etc/nginx-site.conf" | nindent 4 }}
+    {{- end }}

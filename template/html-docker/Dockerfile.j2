@@ -1,0 +1,47 @@
+FROM alpine:3.18
+
+# Add tools
+RUN apk add --no-cache wget git curl bash patch zip unzip rsync
+
+# Fix permission
+RUN /bin/sh -c set -eux; adduser -u 82 -D -S -G www-data www-data && \
+    mkdir -p /var/www/html /output && \
+    chown -R www-data:www-data /var/www/html /output
+
+USER www-data
+WORKDIR /var/www/html
+
+# Get moodle
+COPY --chmod=755 bin/get_moodle.sh /usr/local/sbin/
+RUN get_moodle.sh
+
+# Get moodle plugins
+{% with p = plugins -%}
+{% if p['forcedcache']['enable'] -%}
+COPY --chmod=755 bin/get_forcedcache.sh /usr/local/sbin/
+RUN get_forcedcache.sh
+{%- endif %}
+{% if p['coderunner']['enable'] -%}
+COPY --chmod=755 bin/get_coderunner.sh /usr/local/sbin/
+RUN get_coderunner.sh
+{%- endif %}
+{% if p['stack']['enable'] -%}
+COPY --chmod=755 bin/get_stack.sh /usr/local/sbin/
+RUN get_stack.sh
+{%- endif %}
+{{ p['extra'] }}
+{%- endwith %}
+
+# Fix issues
+COPY --chmod=755 bin/patch_moodle.sh /usr/local/sbin/
+RUN patch_moodle.sh
+
+# To prevent repeated initialization
+# See run.sh
+RUN touch .initialized
+
+USER root
+
+COPY --chmod=755 bin/run.sh /usr/local/sbin/
+
+CMD ["run.sh"]

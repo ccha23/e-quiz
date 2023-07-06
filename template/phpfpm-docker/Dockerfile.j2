@@ -1,0 +1,103 @@
+FROM php:8.1-fpm-alpine3.18 as prod
+
+RUN apk add --no-cache --virtual .build-deps \
+        $PHPIZE_DEPS \
+        libzip-dev \
+        libpng-dev \
+        libxml2-dev \
+        icu-dev \
+        yaml-dev \
+    && apk add --no-cache \
+        libzip \
+        libpng \
+        libxml2 \
+        icu \
+        yaml \
+    && printf "%s\n" "yes" | pecl install \
+        xmlrpc-1.0.0RC3 \
+        igbinary-3.2.14 \
+        redis-5.3.7 \
+        apcu-5.1.22 \
+        yaml-2.2.3 \
+    && docker-php-ext-install \
+        # Enabled by default in the current php image
+        # iconv \
+        # mbstring \
+        # curl \
+        # openssl \
+        # tokenizer \
+        # ctype \
+        # # some error
+        # dom \
+        # xml \
+        # # core extensions, always available
+        # pcre \
+        # spl \
+        # json \
+        # # Deprecated
+        # pdo_mysql \
+        #
+        # Required/recommended for moodle but not yet included by default
+        exif \
+        soap \
+        zip \
+        gd \
+        simplexml \
+        intl \
+        # For mariadb
+        mysqli \
+        # Others
+        # bcmath \
+        opcache \
+        -j $(nproc) \
+    && docker-php-ext-enable \
+        # required for extensions not installed with docker-php-ext-install
+        xmlrpc \
+        igbinary \
+        redis \
+        apcu \
+        # for Moodle Stack
+        yaml \
+    && apk del .build-deps \
+    && rm -rf /tmp/pear/*
+
+FROM prod as init
+
+COPY --chmod=755 sbin/ /usr/local/sbin/
+
+ENV WWWROOT='http://localhost' \
+    DATAROOT=/var/www/moodledata \
+    DBTYPE=mariadb \
+    DBHOST=localhost \
+    DBNAME=moodle \
+    DBUSER=moodleuser \
+    DBPASS='yourpassword' \
+    DBPORT=3306 \
+    DBSOCKET='/var/run/mysqld/mysqld.sock' \
+    SITEPRESET='' \
+    PREFIX='mdl_' \
+    FULLNAME='E-Quiz CS1302' \
+    SHORTNAME=cs1302 \
+    SUMMARY='E-Quiz for CS1302 Introduction to Computer Programming.' \
+    ADMINUSER=admin \
+    ADMINPASS='Admin.123' \
+    ADMINEMAIL='' \
+    SUPPORTEMAIL='' \
+    UPGRADEKEY=''
+
+ENTRYPOINT []
+
+CMD ["run.sh"]
+
+{# FROM prod as debug
+
+RUN apk add --no-cache --virtual .build-deps \
+     linux-headers $PHPIZE_DEPS \
+    && pecl install \
+        xdebug-3.2.1 \
+    && docker-php-ext-enable \
+        xdebug \
+    && apk del .build-deps \
+    && rm -rf /tmp/pear/*
+
+ENV XDEBUG_MODE='debug' XDEBUG_CONFIG='client_port=9003' #}

@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "phpfpm.fullname" . }}
+  labels:
+    {{- include "phpfpm.labels" . | nindent 4 }}
+spec:
+  clusterIP: None
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: phpfpm
+      protocol: TCP
+  selector:
+    {{- include "phpfpm.selectorLabels" . | nindent 4 }}
+{{- if eq .Values.service.type "LoadBalancer" }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "phpfpm.fullname" . }}
+  labels:
+    {{- include "phpfpm.labels" . | nindent 4 }}
+spec:
+  type: LoadBalancer
+  externalTrafficPolicy: Local
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: phpfpm
+      protocol: TCP
+  selector:
+    statefulset.kubernetes.io/pod-name: {{ .Chart.Name }}-0
+{{- end }}

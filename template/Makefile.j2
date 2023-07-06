@@ -1,0 +1,67 @@
+# namespace for the helm deployment
+namespace := {{ namespace }}
+# release name for the helm deployment
+release := {{ release }}
+# registry name to push docker images built for equiz
+registry := {{ registry }}
+# project name used for docker-compose and the prefix for images built for equiz such as html, phpfpminit, and phpfpm.
+project := {{ namespace }}
+tag := latest
+
+# Build and push docker images for equiz
+push.%:
+	@cd $*-docker && \
+	make registry=$(registry) name=$(project)_$* tag=$(tag)
+
+push: push.html push.phpfpm
+
+# Create namespace if it does not exist
+namespace:
+	@if ! kubectl get namespace $(namespace) >/dev/null 2>&1; then \
+        echo "Creating namespace $(namespace)"; \
+        kubectl create namespace $(namespace); \
+    else \
+        echo "Namespace $(namespace) already exists"; \
+    fi
+
+# Remove the namespace
+# Helm deployments and other resources such as PVCs created under the namespace will be removed.
+rm.namespace:
+	@if kubectl get namespace $(namespace) >/dev/null 2>&1; then \
+		echo "Removing namespace $(namespace)..."; \
+		kubectl delete namespace $(namespace); \
+    fi
+
+# Helm upgrade equiz
+upgrade: namespace push
+	@echo "Helm upgrading $(release) in $(namespace)..."
+	microk8s helm upgrade -i -n $(namespace) $(release) ../chart -f values.yaml --wait
+	helm list -n $(namespace) && kubectl get all -n $(namespace)
+
+# Helm test upgrade
+test:
+	@echo "Helm test upgrading $(release) in $(namespace)..."
+	microk8s helm upgrade -i -n $(namespace) $(release) ../chart -f values.yaml --wait --dry-run --debug
+
+# Helm delete equiz
+delete:
+	@echo "Deleting $(release) from $(namespace)..."
+	microk8s helm delete -n $(namespace) $(release) --wait
+
+# -------------------------------------------------------------
+# Test docker images with docker compose
+
+up:
+	@echo "Running docker-compose up..."
+	docker-compose -p $(project) up --build
+
+down:
+	@echo "Running docker-compose down..."
+	docker-compose -p $(project) down
+
+rm.up:
+	@echo "Running docker-compose down and removing docker volumes..."
+	docker-compose -p $(project) down -v
+
+
+.PHONY: up down clean upgrade delete namespace pvc test rm.% push.% push

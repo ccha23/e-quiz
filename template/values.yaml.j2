@@ -1,0 +1,123 @@
+{% with svc = phpfpm -%}
+phpfpm:
+  image:
+  {%- for k, v in svc['image'].items() %}
+    {{ k }}: {{ v }}
+  {%- endfor %}
+  resources:
+  {%- for k, v in svc['resources'].items() %}
+    {{ k }}: {% if v is mapping %}
+    {%- for kk, vv in v.items() %}
+      {{ kk }}: {{ vv }}
+    {%- endfor %}{% else %}{{ v }}{% endif %}
+  {%- endfor %}    
+{%- endwith %}
+
+{% with svc = mariadb -%}
+mariadb:
+  image:
+  {%- for k, v in svc['image'].items() %}
+    {{ k }}: {{ v }}
+  {%- endfor %}
+  resources:
+  {%- for k, v in svc['resources'].items() %}
+    {{ k }}: {% if v is mapping %}
+    {%- for kk, vv in v.items() %}
+      {{ kk }}: {{ vv }}
+    {%- endfor %}{% else %}{{ v }}{% endif %}
+  {%- endfor %}
+{%- endwith %}
+
+{% with svc = nginx -%}
+nginx:
+  image:
+  {%- for k, v in svc['image'].items() %}
+    {{ k }}: {{ v }}
+  {%- endfor %}
+  {%- if port %}
+  service:
+    port: {{ port }}
+  {%- endif %}
+  ingress:
+    enabled: true 
+    className: ""
+    annotations:
+      nginx.ingress.kubernetes.io/proxy-body-size: {{ proxy_body_size }}
+      nginx.ingress.kubernetes.io/rewrite-target: /$2
+    hosts:
+      - host: {{ host }}
+        paths:
+          - path: {{ route }}(/|$)(.*)
+            pathType: Prefix 
+  resources:
+  {%- for k, v in svc['resources'].items() %}
+    {{ k }}: {% if v is mapping %}
+    {%- for kk, vv in v.items() %}
+      {{ kk }}: {{ vv }}
+    {%- endfor %}{% else %}{{ v }}{% endif %}
+  {%- endfor %}
+{%- endwith %}
+
+{% with svc = debug -%}
+debug:
+  enabled: {% if debug['enabled'] %}true{% else %}false{% endif %}
+  image:
+  {%- for k, v in svc['image'].items() %}
+    {{ k }}: {{ v }}
+  {%- endfor %}
+  resources:
+  {%- for k, v in svc['resources'].items() %}
+    {{ k }}: {% if v is mapping %}
+    {%- for kk, vv in v.items() %}
+      {{ kk }}: {{ vv }}
+    {%- endfor %}{% else %}{{ v }}{% endif %}
+  {%- endfor %}
+{%- endwith %}
+
+etc:
+{%- for k, v in etc.items() %}
+  {{ k }}: {% if v %}|-
+    {{ v }}
+  {%- else %}""{% endif %}
+{%- endfor %}
+
+
+pvc:
+{%- for k, v in pvc.items() %}
+  {{ k }}: 
+  {%- for kk, vv in v.items() %}
+    {{ kk }}: {{ vv }}
+  {%- endfor %}
+{%- endfor %}
+
+
+global:
+  {%- with e = global["existingPvc"] %}
+  existingPvc:
+    {%- for p, n in e.items() %}
+      {{ p }}: {% if n %}{{ n }}{% else %}""{% endif %}
+    {%- endfor %}
+  {%- endwith %}
+  htmlInitImage: {{ registry }}/{{ namespace }}_html
+  phpfpminitImage: {{ registry }}/{{ namespace }}_phpfpminit
+
+{% if secret is defined and secret is mapping -%}
+secret:
+{%- for k, v in secret.items() %}
+  {{ k }}:
+  {%- for kk, vv in v.items() %}
+    {{ kk }}: {{ vv }}
+  {%- endfor %}
+{%- endfor %}
+{%- endif %}
+
+{% if env is defined and env is mapping -%}
+env:
+{%- for k, v in env.items() %}
+  {{ k }}: 
+  {%- for kk, vv in v.items() %}
+    {{ kk }}: {{ vv }}
+  {%- endfor %}
+{%- endfor %}
+{%- endif %}
+

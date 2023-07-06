@@ -1,0 +1,18 @@
+{{- range $pvc, $cfg := .Values.pvc }}
+{{- if not (index $.Values.global.existingPvc $pvc) }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "equiz.release" $ }}-{{ $pvc }}
+  labels:
+    {{- include "equiz.labels" $ | nindent 4 }}
+spec:
+  accessModes:
+    - {{ $cfg.accessMode }}
+  resources:
+    requests:
+      storage: {{ $cfg.size }}
+  storageClassName: {{ $cfg.storageClassName }}
+{{- end }}
+{{- end }}
