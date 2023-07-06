@@ -61,10 +61,13 @@ env:
     FULLNAME: 'E-Quiz'
     SHORTNAME: {{ namespace }}
     SUMMARY: 'E-Quiz for Programmable Online Exam.'
+    N_CRON: 3
+    N_ADHOC: 3
   mariadb:
     MYSQL_USER: *DBUSER
     MYSQL_DATABASE: *DBNAME
 
+{%- set coderunner = True %} 
 # Settings for installing/configuring moodle plugins.
 # These are used to build docker images to initialize moodle.
 # (TODO: link to the instructions for building/using equiz images)
@@ -72,14 +75,14 @@ plugins:
   # Named plugins recognized by equiz to initialize . (TODO: link to setup instructions for adding named plugins.)
   # Template:
   # ( plugin_name ):
-  #   enable: ( true or false: whether to enable the plugin. )
+  #   enabled: ( true or false: whether to enable the plugin. )
   #   (TODO: other configurations.)
   forcedcache:
-    enable: false
+    enabled: false
   coderunner:
-    enable: false
+    enabled: {{ "true" if coderunner else "false" }}
   stack:
-    enable: false
+    enabled: false
   # Extra commands to install other plugins. (TODO: link to the instructions for adding other plugins.)
   extra: ""
 
@@ -137,13 +140,28 @@ debug:
       cpu: 1
       memory: 1Gi
 
+# Settings for jobe
+jobe:
+  name: {{ release }}-jobe
+  enabled: {{ "true" if coderunner else "false" }}
+  image:
+    repository: trampgeek/jobeinabox
+    tag: latest
+  resources:
+    limits:
+      cpu: 1
+      memory: 4Gi
+    requests:
+      cpu: 1
+      memory: 1Gi
+
 global:
   # To use existing PVCs
   existingPvc:
     html: ""
     moodledata: ""
     mysql: ""
-  htmlInitImage: {{ registry }}/{{ namespace }}_html
+  htmlImage: {{ registry }}/{{ namespace }}_html
   phpfpminitImage: {{ registry }}/{{ namespace }}_phpfpminit
 
 # PVCs to be created by helm upgrade of equiz, if global.existingPvc is not specified.

@@ -136,7 +136,7 @@ persistentVolumeClaim:
 
 {{- define "equiz.html.init" -}}
 name: html
-image: {{ .Values.global.htmlInitImage }}
+image: {{ .Values.global.htmlImage }}
 imagePullPolicy: Always
 volumeMounts:
   - name: html

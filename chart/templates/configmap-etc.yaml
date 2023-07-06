@@ -35,3 +35,9 @@ data:
     {{- else }}
     {{- .Files.Get "etc/nginx-site.conf" | nindent 4 }}
     {{- end }}
+  config.php: |-
+    {{- if .Values.etc.configphp }}
+    {{- .Values.etc.configphp | nindent 4 }}
+    {{- else }}
+    {{- .Files.Get "etc/config.php" | nindent 4 }}
+    {{- end }}

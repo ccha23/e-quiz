@@ -79,6 +79,17 @@ services:
     networks:
       - {{ namespace }}
 
+  {% if plugins['coderunner']['enabled'] %}
+  jobe:
+    image: {{ jobe['image']['repository'] }}:{{ jobe['image']['tag'] }}
+    volumes:
+      - html:/var/www/html
+      - moodledata:/var/www/moodledata
+      - ../chart/etc/config.php:/var/www/html/jobe/application/config/config.php:ro
+    networks:
+      - {{ namespace }}  
+  {% endif %}
+
 networks:
   {{ namespace }}:
     driver: bridge

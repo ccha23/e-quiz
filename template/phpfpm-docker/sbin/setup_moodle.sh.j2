@@ -2,8 +2,6 @@
 
 set -eux
 
-su -s /bin/sh www-data <<'EOF'
-
 php /var/www/html/admin/cli/install.php \
     --chmod=2770            \
     --lang=en       \
@@ -38,7 +36,7 @@ content=$(cat <<'EEOF'
 # X-Sendfile feature
 $CFG->xsendfile = 'X-Accel-Redirect';
 $CFG->xsendfilealiases = array(
-#    '/dataroot/' => $CFG->dataroot,
+#  '/dataroot/' => $CFG->dataroot,
 #    '/cachedir/' => $CFG->dataroot . '/cache',            // for custom $CFG->cachedir locations
 #    '/localcachedir/' => $CFG->dataroot . '/localcache',  // for custom $CFG->localcachedir locations
 #    '/tempdir/'  => $CFG->dataroot . '/temp',             // for custom $CFG->tempdir locations
@@ -46,7 +44,7 @@ $CFG->xsendfilealiases = array(
 );
 
 {% with p = plugins -%}
-{% if p['forcedcache']['enable'] -%}
+{% if p['forcedcache']['enabled'] -%}
 # Forced Cache
 # See https://github.com/catalyst/moodle-tool_forcedcache#configuration
 $CFG->tool_forcedcache_config_path = '/var/www/eqconfig/config.json';
@@ -76,10 +74,17 @@ if [ -n "$last_match" ]; then
   awk -v insert_line=${insert_line} -v content="$content" 'NR==insert_line{print content}1' /var/www/html/config.php > /tmp/config.php && mv /tmp/config.php /var/www/html/config.php
 fi
 
+# Block access to internal IPs but not 
+# - 10.0.0.0.0/8, which is used by services in kubernetes, and
+# - 192.168.0.0/16, which is used by services in docker-compose. 
+php /var/www/html/admin/cli/cfg.php --name=curlsecurityblockedhosts --set="$(cat << 'EOF'
+127.0.0.0/8
+172.16.0.0/12
+0.0.0.0
+localhost
+169.254.169.254
+EOF
+)"
+
 # Create a default course
 # php /var/www/html/admin/cli/restore_backup.php --file=/var/www/eqconfig/course.mbz --categoryid=1
-
-# Purge caches
-# php /var/www/html/admin/cli/purge_caches.php
-
-EOF

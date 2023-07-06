@@ -16,16 +16,16 @@ COPY --chmod=755 bin/get_moodle.sh /usr/local/sbin/
 RUN get_moodle.sh
 
 # Get moodle plugins
-{% with p = plugins -%}
-{% if p['forcedcache']['enable'] -%}
+{%- with p = plugins %}
+{%- if p['forcedcache']['enabled'] %}
 COPY --chmod=755 bin/get_forcedcache.sh /usr/local/sbin/
 RUN get_forcedcache.sh
 {%- endif %}
-{% if p['coderunner']['enable'] -%}
+{%- if p['coderunner']['enabled'] %}
 COPY --chmod=755 bin/get_coderunner.sh /usr/local/sbin/
 RUN get_coderunner.sh
 {%- endif %}
-{% if p['stack']['enable'] -%}
+{%- if p['stack']['enabled'] %}
 COPY --chmod=755 bin/get_stack.sh /usr/local/sbin/
 RUN get_stack.sh
 {%- endif %}

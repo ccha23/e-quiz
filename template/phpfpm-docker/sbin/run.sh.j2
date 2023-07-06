@@ -1,0 +1,39 @@
+#!/bin/sh
+
+set -eux
+
+# if [ ! -d /var/www/html ]; then
+#   echo "Error: Moodle root directory /var/www/html is missing."
+#   exit 1
+# fi
+
+# # Initialize Moodle folder if an empty volume is mounted to it
+# if [ -z "$(ls -A /var/www/html)" ]; then
+#   echo "Error: Moodle root directory /var/www/html is empty."
+#   exit 1
+# fi
+
+# # Initialize Moodle data folder if an empty volume is mounted to it
+if [ -z "$(ls -A /var/www/moodledata)" ]; then
+  echo "Initializing /var/www/moodledata"
+  chown -R www-data:www-data /var/www/moodledata && \
+  chmod 775 /var/www/moodledata
+else
+  echo "moodledata is non-empty." && exit 0
+fi
+
+wait_db_ready.php
+
+# Initialize Moodle Database
+if [ ! -f /var/www/html/config.php ]; then
+  echo "Setting up moodle"
+  su -s /bin/sh www-data -c setup_moodle.sh
+fi
+
+
+{% if plugins['coderunner']['enabled'] -%}
+su -s /bin/sh www-data -c setup_coderunner.sh
+{%- endif %}
+
+# Purge caches
+su -s /bin/sh www-data -c 'php /var/www/html/admin/cli/purge_caches.php'
