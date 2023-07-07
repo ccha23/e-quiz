@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "maxima.fullname" . }}
+  labels:
+    {{- include "maxima.selectorLabels" . | nindent 4 }}
+data:
+  MAXIMAPOOL_ADMIN_PASSWORD:  {{ .Values.credentials.ADMINPASS }}

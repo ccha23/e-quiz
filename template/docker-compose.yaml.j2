@@ -90,6 +90,17 @@ services:
       - {{ namespace }}  
   {% endif %}
 
+  {% if plugins['stack']['enabled'] %}
+  maxima:
+    image: {{ maxima['image']['repository'] }}:{{ maxima['image']['tag'] }}
+    volumes:
+      - ../chart/etc/pool.conf:/opt/maximapool/pool.conf:ro
+    env_file: 
+      - maxima.env
+    networks:
+      - {{ namespace }}  
+  {% endif %}
+
 networks:
   {{ namespace }}:
     driver: bridge

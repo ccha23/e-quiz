@@ -18,19 +18,21 @@ secret:
   #   { app name }:
   #     { variable name }: { string value }
   phpfpminit:
-    ADMINPASS: 'Admin.1234'
+    ADMINPASS: &ADMINPASS 'Admin.1234'
     DBPASS: &DBPASS 'yourpassword'
     UPGRADEKEY: ''
   mariadb:
     MYSQL_ROOT_PASSWORD: *DBPASS
     MYSQL_PASSWORD: *DBPASS
+  maxima:
+    MAXIMAPOOL_ADMIN_PASSWORD: *ADMINPASS
 
 {%- set protocol = 'http' %}                   # 'http' or 'https' (TODO: link to setup instructions for self-signed or lets-encrypt cert for kubernetes. See acme and myca folders.)
 {%- set host = 'localhost' %}                  # replace by the actual host name. (TODO: link to setup instructions for ingress in values.yaml file.)
 {%- set port = '' %}                           # (TODO: test if other ports such as 8181 actually works, and add appropriate instructions.)
 {%- set namespace = 'equiz' %}                 # Namespace for helm deployment of equiz to identify related resources.
 {%- set release = 'default' %}                 # Release name for helm deployment to identify related resources for different releases in the same namespace. 
-                                               # (TODO: Support multiple helm deployments to the same namespace by attaching .Release.Name to services like mariadb, phpfpm, maximapool...)
+                                               # (TODO: Support multiple helm deployments to the same namespace by attaching .Release.Name to services like mariadb, phpfpm, maxima...)
 {%- set route = '/'+namespace -%}              # Must must a valid path starting with '/' mapped to the external base URL.
 {%- set registry ='localhost:32000' %}         # Used by docker to store custom built docker images for equiz so the kubernetes can pull from it. Default to the private registry accessible by kubernetes. (TODO: link to setup instructions that enable private registry.)
 namespace: {{ namespace }}
@@ -66,6 +68,7 @@ env:
     MYSQL_DATABASE: *DBNAME
 
 {%- set coderunner = True %} 
+{%- set stack = True %} 
 # Settings for installing/configuring moodle plugins.
 # These are used to build docker images to initialize moodle.
 # (TODO: link to the instructions for building/using equiz images)
@@ -80,7 +83,7 @@ plugins:
   coderunner:
     enabled: {{ "true" if coderunner else "false" }}
   stack:
-    enabled: false
+    enabled: {{ "true" if stack else "false" }}
   # Extra commands to install other plugins. (TODO: link to the instructions for adding other plugins.)
   extra: ""
 
@@ -140,11 +143,24 @@ debug:
 
 # Settings for jobe
 jobe:
-  name: {{ release }}-jobe
   enabled: {{ "true" if coderunner else "false" }}
   image:
     repository: trampgeek/jobeinabox
     tag: latest
+  resources:
+    limits:
+      cpu: 1
+      memory: 4Gi
+    requests:
+      cpu: 1
+      memory: 1Gi
+
+# Settings for maxima
+maxima:
+  enabled: {{ "true" if stack else "false" }}
+  image:
+    repository: unihalle/maximapool
+    tag: stack-2020101501
   resources:
     limits:
       cpu: 1

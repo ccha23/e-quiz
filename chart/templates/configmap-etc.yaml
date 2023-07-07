@@ -41,3 +41,9 @@ data:
     {{- else }}
     {{- .Files.Get "etc/config.php" | nindent 4 }}
     {{- end }}
+  pool.conf: |-
+    {{- if .Values.etc.poolconf }}
+    {{- .Values.etc.poolconf | nindent 4 }}
+    {{- else }}
+    {{- .Files.Get "etc/pool.conf" | nindent 4 }}
+    {{- end }}

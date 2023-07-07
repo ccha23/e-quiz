@@ -85,6 +85,11 @@ secretRef:
   name: {{ include "equiz.release" . }}-mariadb-secret
 {{- end }}
 
+{{- define "equiz.maxima.secret" -}}
+secretRef:
+  name: {{ include "equiz.release" . }}-maxima-secret
+{{- end }}
+
 {{- define "equiz.etc" -}}
 name: etc
 configMap:
@@ -155,7 +160,6 @@ volumeMounts:
 - name: moodledata
   mountPath: /var/www/moodledata
 {{- end }}
-
 
 {{- define "equiz.phpfpm.init" -}}
 name: phpfpminit

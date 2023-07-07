@@ -90,6 +90,22 @@ jobe:
   {%- endfor %}
 {%- endwith %}
 
+{% with svc = maxima -%}
+maxima:
+  enabled: {% if maxima['enabled'] %}true{% else %}false{% endif %}
+  image:
+  {%- for k, v in svc['image'].items() %}
+    {{ k }}: {{ v }}
+  {%- endfor %}
+  resources:
+  {%- for k, v in svc['resources'].items() %}
+    {{ k }}: {% if v is mapping %}
+    {%- for kk, vv in v.items() %}
+      {{ kk }}: {{ vv }}
+    {%- endfor %}{% else %}{{ v }}{% endif %}
+  {%- endfor %}
+{%- endwith %}
+
 etc:
 {%- for k, v in etc.items() %}
   {{ k }}: {% if v %}|-
