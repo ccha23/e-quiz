@@ -1,0 +1,46 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "equiz.fullname" . }}-moodle
+  labels:
+    {{- include "equiz.labels" . | nindent 4 }}
+spec:
+  schedule: "* * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: moodle-cron
+            image: "{{ .Values.phpfpm.image.repository }}:{{ .Values.phpfpm.image.tag | default .Subcharts.phpfpm.AppVersion }}"
+            imagePullPolicy: {{ .Values.phpfpm.image.pullPolicy }}
+            command:
+            - su
+            - -s
+            - /bin/sh
+            - www-data
+            - -c
+            - if nc -z phpfpm 9000; then php /var/www/html/admin/cli/cron.php; fi
+            volumeMounts:
+            {{- include "equiz.phpfpm.volumeMounts" . | nindent 12 }}
+          - name: moodle-adhoc
+            image: "{{ .Values.phpfpm.image.repository }}:{{ .Values.phpfpm.image.tag | default .Subcharts.phpfpm.AppVersion }}"
+            imagePullPolicy: {{ .Values.phpfpm.image.pullPolicy }}
+            command:
+            - su
+            - -s
+            - /bin/sh
+            - www-data
+            - -c
+            - if nc -z phpfpm 9000; then php /var/www/html/admin/cli/adhoc_task.php --execute --keep-alive=59; fi
+            volumeMounts:
+            {{- include "equiz.phpfpm.volumeMounts" . | nindent 12 }}
+          restartPolicy: OnFailure
+          volumes:
+          - 
+            {{- include "equiz.html" . | nindent 12 }}
+          - 
+            {{- include "equiz.moodledata" . | nindent 12 }}
+          - 
+            {{- include "equiz.etc" . | nindent 12 }}
+

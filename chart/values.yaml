@@ -210,11 +210,6 @@ etc:
   nginxSite: ""
   configphp: ""
 
-credentials:
-  ADMINUSER: admin
-  ADMINPASS: 'Admin.123'
-  UPGRADEKEY: ''
-
 pvc:
   html:
     storageClassName: ""
