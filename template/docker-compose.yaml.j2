@@ -34,6 +34,9 @@ services:
       - moodledata:/var/www/moodledata
       - ../chart/etc/php.ini:/usr/local/etc/php/php.ini:ro
       - ../chart/etc/php-fpm.conf:/usr/local/etc/php-fpm.d/zzz_custom.conf:ro
+      {%- if plugins['forcedcache']['enabled'] %}
+      - ../chart/etc/forcedcache.json:/var/www/eqconfig/forcedcache.json:ro
+      {%- endif %}      
     env_file: 
       - phpfpminit.env
     depends_on:
@@ -53,6 +56,9 @@ services:
       - moodledata:/var/www/moodledata
       - ../chart/etc/php.ini:/usr/local/etc/php/php.ini:ro
       - ../chart/etc/php-fpm.conf:/usr/local/etc/php-fpm.d/zzz_custom.conf:ro
+      {%- if plugins['forcedcache']['enabled'] %}
+      - ../chart/etc/forcedcache.json:/var/www/eqconfig/forcedcache.json:ro
+      {%- endif %}
     depends_on:
       phpfpminit:
         condition: service_completed_successfully
@@ -79,12 +85,29 @@ services:
     networks:
       - {{ namespace }}
 
+  {# {% if debug['enabled'] %}
+  debug:
+    image: {{ debug['image']['repository'] }}:{{ debug['image']['tag'] }}
+    volumes:
+      - html:/var/www/html
+      - moodledata:/var/www/moodledata
+    networks:
+      - {{ namespace }}  
+  {% endif %} #}
+
+  {% if plugins['forcedcache']['enabled'] %}
+  redis:
+    image: {{ redis['image']['repository'] }}:{{ redis['image']['tag'] }}
+    volumes:
+      - ../chart/etc/redis.conf:/usr/local/etc/redis/redis.conf:ro
+    networks:
+      - {{ namespace }}  
+  {% endif %}
+
   {% if plugins['coderunner']['enabled'] %}
   jobe:
     image: {{ jobe['image']['repository'] }}:{{ jobe['image']['tag'] }}
     volumes:
-      - html:/var/www/html
-      - moodledata:/var/www/moodledata
       - ../chart/etc/config.php:/var/www/html/jobe/application/config/config.php:ro
     networks:
       - {{ namespace }}  

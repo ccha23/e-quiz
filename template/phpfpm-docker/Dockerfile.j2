@@ -89,7 +89,9 @@ ENTRYPOINT []
 
 CMD ["run.sh"]
 
-{# FROM prod as debug
+FROM init as debugger
+
+USER root
 
 RUN apk add --no-cache --virtual .build-deps \
      linux-headers $PHPIZE_DEPS \
@@ -99,5 +101,37 @@ RUN apk add --no-cache --virtual .build-deps \
         xdebug \
     && apk del .build-deps \
     && rm -rf /tmp/pear/*
+{# 
+### code-server ###
+RUN wget -q https://code-server.dev/install.sh -O /tmp/install.sh && \
+    sh /tmp/install.sh --version 4.14.1 && \
+    code-server --extensions-dir /usr/lib/code-server/lib/vscode/extensions \
+        --install-extension ms-python.python && \
+    rm -rf ~/.cache/code-server/ && \
+    rm -rf /tmp/install.sh
 
-ENV XDEBUG_MODE='debug' XDEBUG_CONFIG='client_port=9003' #}
+ENV XDEBUG_MODE='debug' XDEBUG_CONFIG='client_port=9003'
+
+
+# Configurations
+COPY etc/ /tmp/etc/
+
+RUN \
+    # Set up Nginx configuration
+    mv /tmp/etc/nginx.conf /etc/nginx/nginx.conf \
+    && mv /tmp/etc/nginx-site.conf /etc/nginx/sites-available/default \
+    # Set up PHP-FPM configuration
+    && mv /tmp/etc/php-fpm.conf /usr/local/etc/php-fpm.d/zzz-custom.conf \
+    # Set up PHP configuration
+    && mv /tmp/etc/php.ini /usr/local/etc/php/php.ini \
+    && mv /tmp/etc/debug-custom.ini /usr/local/etc/php/conf.d/debug-custom.ini \
+    # Set up Mariadb configuration
+    && mv /tmp/etc/my.cnf /etc/mysql/my.cnf \
+    # See scenario 4 in this tracker: https://tracker.moodle.org/browse/MDL-73145
+    && rm -rf /tmp/etc
+
+CMD ["sh"]
+
+# code-server
+EXPOSE 8080
+ #}

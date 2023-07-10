@@ -67,6 +67,7 @@ env:
     MYSQL_USER: *DBUSER
     MYSQL_DATABASE: *DBNAME
 
+{%- set forcedcache = True %}
 {%- set coderunner = True %} 
 {%- set stack = True %} 
 # Settings for installing/configuring moodle plugins.
@@ -79,7 +80,7 @@ plugins:
   #   enabled: ( true or false: whether to enable the plugin. )
   #   (TODO: other configurations.)
   forcedcache:
-    enabled: false
+    enabled: {{ "true" if forcedcache else "false" }}
   coderunner:
     enabled: {{ "true" if coderunner else "false" }}
   stack:
@@ -130,9 +131,24 @@ phpfpm:
 debug:
   enabled: false
   image:
-    repository: {{ registry }}/{{ namespace }}_html
-    tag: latest
+    repository: alpine
+    tag: "3.18"
     pullPolicy: Always
+  command: ["sleep", "infinity"]
+  resources:
+    limits:
+      cpu: 1
+      memory: 4Gi
+    requests:
+      cpu: 1
+      memory: 1Gi
+
+# Settings for redis
+redis:
+  enabled: {{ "true" if forcedcache else "false" }}
+  image:
+    repository: redis
+    tag: 7.0.11-alpine3.18
   resources:
     limits:
       cpu: 1
@@ -200,6 +216,10 @@ etc:
   phpfpm: ""
   nginx: ""
   nginxSite: ""
+  configphp: ""
+  poolconf: ""
+  redisconf: ""
+  forcedcachejson: ""
 
 # Docker-compose setting for the setup/test environment.
 # (TODO: link to the instructions for setting up/testing equiz with docker-compose.)

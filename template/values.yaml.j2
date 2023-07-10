@@ -10,7 +10,7 @@ phpfpm:
     {%- for kk, vv in v.items() %}
       {{ kk }}: {{ vv }}
     {%- endfor %}{% else %}{{ v }}{% endif %}
-  {%- endfor %}    
+  {%- endfor %}
 {%- endwith %}
 
 {% with svc = mariadb -%}
@@ -61,6 +61,22 @@ nginx:
 {% with svc = debug -%}
 debug:
   enabled: {% if debug['enabled'] %}true{% else %}false{% endif %}
+  image:
+  {%- for k, v in svc['image'].items() %}
+    {{ k }}: {{ v }}
+  {%- endfor %}
+  resources:
+  {%- for k, v in svc['resources'].items() %}
+    {{ k }}: {% if v is mapping %}
+    {%- for kk, vv in v.items() %}
+      {{ kk }}: {{ vv }}
+    {%- endfor %}{% else %}{{ v }}{% endif %}
+  {%- endfor %}
+{%- endwith %}
+
+{% with svc = redis -%}
+redis:
+  enabled: {% if redis['enabled'] %}true{% else %}false{% endif %}
   image:
   {%- for k, v in svc['image'].items() %}
     {{ k }}: {{ v }}

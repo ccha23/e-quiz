@@ -1,0 +1,75 @@
+{
+  "stores": {
+    "APCu": {
+      "type": "apcu",
+      "config": {
+        "prefix": "apcu_"
+      }
+    },
+    "redis": {
+      "type": "redis",
+      "config": {
+        "server": "redis:6379",
+        "prefix": "mdl_",
+        "password": "",
+        "serializer": "1",
+        "compressor": "0"          
+      }
+    },
+    "file": {
+      "type": "file",
+      "config": {
+        "path": "/var/www/moodledata/cache/local_file",
+        "autocreate": 1
+      }
+    }
+  },
+  "rules": {
+    "application": [
+      {
+        "conditions" : {
+          "name": "core/plugin_functions"
+        },
+        "stores": ["APCu", "redis"]
+      },  
+      {
+        "conditions" : {
+          "name": "core/string"
+        },
+        "stores": ["APCu", "redis"]
+      },  
+      {
+        "conditions" : {
+          "name": "core/langmenu"
+        },
+        "stores": ["APCu", "redis"]
+      },    
+      {
+        "conditions" : {
+          "name": "core/htmlpurifier"
+        },
+        "stores": ["file"]
+      },
+      {
+        "conditions" : {
+          "name": "core/coursemodinfo"
+        },
+        "stores": ["file"]
+      },
+      {
+        "stores":["redis"]
+      }
+    ],
+    "session": [
+      {
+        "stores": ["redis"]
+      }
+    ],
+    "request": []
+  },
+  "definitionoverrides": {
+    "core/plugin_functions": {
+        "canuselocalstore": true
+    }
+  }
+}

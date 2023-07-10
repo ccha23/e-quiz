@@ -47,7 +47,9 @@ $CFG->xsendfilealiases = array(
 {% if p['forcedcache']['enabled'] -%}
 # Forced Cache
 # See https://github.com/catalyst/moodle-tool_forcedcache#configuration
-$CFG->tool_forcedcache_config_path = '/var/www/eqconfig/config.json';
+# Visit { WWWROOT }/admin/tool/forcedcache/ to check the configuration
+$CFG->tool_forcedcache_config_path = '/var/www/eqconfig/forcedcache.json';
+# Comment (uncomment) the following line to enable (disable) forced caching
 $CFG->alternative_cache_factory_class = 'tool_forcedcache_cache_factory';
 {%- endif %}
 {%- endwith %}

@@ -159,6 +159,9 @@ volumeMounts:
   mountPath: /var/www/html
 - name: moodledata
   mountPath: /var/www/moodledata
+- name: etc
+  mountPath: /var/www/eqconfig/forcedcache.json
+  subPath: forcedcache.json
 {{- end }}
 
 {{- define "equiz.phpfpm.init" -}}

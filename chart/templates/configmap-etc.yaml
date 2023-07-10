@@ -47,3 +47,15 @@ data:
     {{- else }}
     {{- .Files.Get "etc/pool.conf" | nindent 4 }}
     {{- end }}
+  redis.conf: |-
+    {{- if .Values.etc.redisconf }}
+    {{- .Values.etc.redisconf | nindent 4 }}
+    {{- else }}
+    {{- .Files.Get "etc/redis.conf" | nindent 4 }}
+    {{- end }}
+  forcedcache.json: |-
+    {{- if .Values.etc.forcedcachejson }}
+    {{- .Values.etc.forcedcachejson | nindent 4 }}
+    {{- else }}
+    {{- .Files.Get "etc/forcedcache.json" | nindent 4 }}
+    {{- end }}

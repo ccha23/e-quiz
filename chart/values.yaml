@@ -105,15 +105,15 @@ nginx:
     httpGet:
       path: /
       port: http
-    initialDelaySeconds: 60
-    periodSeconds: 60
-    failureThreshold: 10
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    failureThreshold: 50
   readinessProbe:
     httpGet:
       path: /
       port: http
-    initialDelaySeconds: 30
-    periodSeconds: 30
+    initialDelaySeconds: 5
+    periodSeconds: 10
     failureThreshold: 50
 
 
@@ -137,6 +137,41 @@ debug:
       +: "equiz.html"
     - name: moodledata 
       +: "equiz.moodledata"
+
+# Settings for the jobe server for coderunner
+redis:
+  enabled: false
+  fullnameOverride: "redis"
+  image: 
+    repository: redis
+    tag: 7.0.11-alpine3.18
+  volumeMounts:
+    - name: etc
+      mountPath: "/usr/local/etc/redis/redis.conf"
+      subPath: "redis.conf"
+  volumes:
+    - name: etc 
+      +: "equiz.etc"
+  livenessProbe:
+    exec:
+      command: 
+        - redis-cli
+        - ping
+    initialDelaySeconds: 60
+    periodSeconds: 10
+    timeoutSeconds: 5
+    successThreshold: 1
+    failureThreshold: 50
+  readinessProbe:
+    exec:
+      command: 
+        - redis-cli
+        - ping
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    successThreshold: 1
+    failureThreshold: 50
 
 # Settings for the jobe server for coderunner
 jobe:
@@ -209,6 +244,8 @@ etc:
   nginx: ""
   nginxSite: ""
   configphp: ""
+  poolconf: ""
+  redisconf: ""
 
 pvc:
   html:
