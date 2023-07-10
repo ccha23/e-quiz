@@ -125,7 +125,7 @@ maxima:
 etc:
 {%- for k, v in etc.items() %}
   {{ k }}: {% if v %}|-
-    {{ v }}
+    {{ v | indent(4) }}
   {%- else %}""{% endif %}
 {%- endfor %}
 

@@ -1,0 +1,26 @@
+#!/bin/sh
+
+set -eux
+
+# For test course generation
+# See https://docs.moodle.org/402/en/Test_course_generator                                                                                                                    
+php /var/www/html/admin/cli/cfg.php --name=debug --set=32767
+
+{%- with t = testcourse %}
+php /var/www/html/admin/cli/cfg.php --name=tool_generator_users_password --set='{{ t["tool_generator_users_password"] }}'
+
+# Utility to create standard test course
+# Options:
+# --shortname      Shortname of course to create (required)
+# --fullname       Fullname of course to create (optional)
+# --summary        Course summary, in double quotes (optional)
+# --size           Size of course to create XS, S, M, L, XL, or XXL (required)
+# --fixeddataset   Use a fixed data set instead of randomly generated data
+# --filesizelimit  Limits the size of the generated files to the specified bytes
+# --bypasscheck    Bypasses the developer-mode check (be careful!)
+# --additionalmodules Additional modules to be created when creating a course: a comma separated modules names without the mod_prefix
+#                     (like quiz, forum...)
+# --quiet          Do not show any output
+php admin/tool/generator/cli/maketestcourse.php --shortname={{ t.shortname }} --size={{ t.size}}
+{%- endwith %}
+
