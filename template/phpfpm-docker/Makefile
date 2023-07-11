@@ -16,8 +16,8 @@ all: .built_$(name)_$(tag)
 	docker push "$(registry)/$(name):$*" && \
 	docker build --target=init -t "$(registry)/$(name)init:$*" . && \
 	docker push "$(registry)/$(name)init:$*" && \
-	docker build --target=debugger -t "$(registry)/$(name)debugger:$*" . && \
-	docker push "$(registry)/$(name)debugger:$*" && \
+	# docker build --target=debugger -t "$(registry)/$(name)debugger:$*" . && \
+	# docker push "$(registry)/$(name)debugger:$*" && \
 	touch $@
 
 # Remove the dummy hidden files that would otherwise prevent the docker images from being rebuilt

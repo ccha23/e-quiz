@@ -89,7 +89,7 @@ ENTRYPOINT []
 
 CMD ["run.sh"]
 
-FROM init as debugger
+{# FROM init as debugger
 
 USER root
 
@@ -100,7 +100,7 @@ RUN apk add --no-cache --virtual .build-deps \
     && docker-php-ext-enable \
         xdebug \
     && apk del .build-deps \
-    && rm -rf /tmp/pear/*
+    && rm -rf /tmp/pear/* #}
 {# 
 ### code-server ###
 RUN wget -q https://code-server.dev/install.sh -O /tmp/install.sh && \
