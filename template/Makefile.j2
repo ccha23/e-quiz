@@ -15,7 +15,7 @@ push.%:
 
 push: push.html push.phpfpm
 
-# Create namespace if it does not exist
+# Create the namespace if it does not exist
 namespace:
 	@if ! kubectl get namespace $(namespace) >/dev/null 2>&1; then \
         echo "Creating namespace $(namespace)"; \
@@ -25,7 +25,8 @@ namespace:
     fi
 
 # Remove the namespace
-# Helm deployments and other resources such as PVCs created under the namespace will be removed.
+# NOTE:
+#   - Helm deployments and other resources created under the namespace will be removed.
 rm.namespace:
 	@if kubectl get namespace $(namespace) >/dev/null 2>&1; then \
 		echo "Removing namespace $(namespace)..."; \
@@ -34,14 +35,17 @@ rm.namespace:
 
 # Helm upgrade equiz
 upgrade: namespace push
-	@echo "Helm upgrading $(release) in $(namespace)..."
+	@echo "Helm upgrading $(release) in $(namespace)..." && \
 	microk8s helm upgrade -i -n $(namespace) $(release) ../chart -f values.yaml --wait
-	helm list -n $(namespace) && kubectl get all -n $(namespace)
 
 # Helm test upgrade
 test:
 	@echo "Helm test upgrading $(release) in $(namespace)..."
 	microk8s helm upgrade -i -n $(namespace) $(release) ../chart -f values.yaml --wait --dry-run --debug
+
+# Get the helm deployment and resources created
+status:
+	@helm list -n $(namespace) && kubectl get all -n $(namespace)
 
 # Helm delete equiz
 delete:
@@ -49,23 +53,34 @@ delete:
 	microk8s helm delete -n $(namespace) $(release) --wait
 
 # Cleanup
+# Remove docker-compose and helm deployments along with the persistent volumes.
 clean: rm.up rm.namespace
 	@echo "Cleaning up..."
 
 # -------------------------------------------------------------
 # Test docker images with docker compose
 
+# Docker-compose up equiz
 up:
 	@echo "Running docker-compose up..."
 	docker-compose -p $(project) up --build
 
+# Docker-compose down equiz
 down:
 	@echo "Running docker-compose down..."
 	docker-compose -p $(project) down
 
+# Docker-compose down equiz and remove the volumes created
 rm.up:
 	@echo "Running docker-compose down and removing docker volumes..."
 	docker-compose -p $(project) down -v
 
+# To run additional setup scripts such as creating a test course/plan for jmeter load testing
+sbin:
+	# Copy additional setup scripts to phpfpm
+	kubectl cp -c phpfpm sbin/* $(namespace)/phpfpm-0:/usr/local/sbin/ && \
+	kubectl exec phpfpm-0 -n $(namespace) -c phpfpm -- chmod -R +x /usr/local/sbin && \
+	# Attach a shell to run scripts as www-data user
+	kubectl exec phpfpm-0 -it -n $(namespace) -c phpfpm -- su -s /bin/sh www-data
 
-.PHONY: up down clean upgrade delete namespace pvc test rm.% push.% push
+.PHONY: up down clean upgrade delete namespace test rm.% push.% push sbin

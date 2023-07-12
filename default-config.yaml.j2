@@ -1,14 +1,19 @@
 # *** IMPORTANT ***
 #
-#   - Change the secrets to your own secrets before deployment. 
-#   - Do not push config.yaml.j2 or ./dist/values.yaml to a public repository. 
-#     By default, ./config.yaml.j2 and ./dist are git-ignored using the .gitignore file. 
-#   - YAML anchor such as &MYPASS is used to avoid inconsistent values.
+#   - For security reason, change the secrets to your own secrets before deployment.
+#     Subsequent changes to the secret after deployment will not work because some persistent volumes 
+#     were initialized only during the first deployment but not the subsequent upgrade.
+#   - Do not push the config file or the distribution dir to a public repository.
+#     By default, ./config*.yaml.j2 and ./dist* are git-ignored. See the .gitignore file. 
+#   - Keep the YAML anchors such as &MYPASS to avoid inconsistent values.
 #     E.g., phpfpminit app uses the same password MYPASS to access the mariadb app configured to use 
 #      - MYSQL_PASSWORD as the password for the moodle user (database) and 
 #      - MYSQL_ROOT_PASSWORD as the root password.
+#     Similarly, keep the jinja2 rendering such as {{ host }} to ensure consistency. E.g., host is used
+#     to set the WWWROOT for moodle as well as the ingress host path.
+#
 # NOTE:
-#   - You may add additional variables for custom built images that recognize them.
+#   - You may add additional variables for custom built docker images that recognize them.
 #   - Be careful of name conflicts as the values here can be overriden by those set 
 #     for any variables of the same name in other ways such as env in container spec.
 secret:
@@ -43,6 +48,39 @@ route: {{ route }}
 registry: {{ registry.rstrip('/') }}
 proxy_body_size: 200M                           # maximum allowed size of the request body
 
+# Docker-compose setting for the setup/test environment.
+# (TODO: link to the instructions for setting up/testing equiz with docker-compose.)
+{%- set dc = { 'protocol': 'http', 'host': 'localhost', 'port': '8080' } %}
+dc:
+  protocol: {{ dc['protocol'] }} 
+  host: {{ dc['host'] }}
+  port: {{ dc['port'] }}
+  env:
+    phpfpminit:
+      WWWROOT: "{{ dc['protocol'] }}://{{ dc['host'] }}{% if dc['port'] -%}:{{ dc['port'] }}{%- endif %}"
+
+# Settings for installing/configuring moodle plugins. E.g., enable forcedcache by setting forcedcache = True, which
+#   - renders $(dist_dir)/html/Dockerfile to download forcedcache plugin files,
+#   - renders $(dist_dir)/phpfpm/sbin/setup_moodle.sh to setup forcedcache for the phpfpminit container, and
+#   - enable subchart redis for caching.
+{%- set forcedcache = True %}
+{%- set coderunner = False %} 
+{%- set stack = False %} 
+plugins:
+  # Named plugins recognized by equiz to initialize . (TODO: link to setup instructions for adding named plugins.)
+  # Template:
+  # ( plugin_name ):
+  #   enabled: ( true or false: whether to enable the plugin. )
+  #   (TODO: other configurations.)
+  forcedcache:
+    enabled: {{ "true" if forcedcache else "false" }}
+  coderunner:
+    enabled: {{ "true" if coderunner else "false" }}
+  stack:
+    enabled: {{ "true" if stack else "false" }}
+  # Extra commands to install other plugins. (TODO: link to the instructions for adding other plugins.)
+  extra: ""
+
 # Information passed to different apps as environment variables using
 # envFrom of the container spec.
 env:
@@ -66,27 +104,6 @@ env:
   mariadb:
     MYSQL_USER: *DBUSER
     MYSQL_DATABASE: *DBNAME
-
-{%- set forcedcache = True %}
-{%- set coderunner = True %} 
-{%- set stack = True %} 
-# Settings for installing/configuring moodle plugins.
-# These are used to build docker images to initialize moodle.
-# (TODO: link to the instructions for building/using equiz images)
-plugins:
-  # Named plugins recognized by equiz to initialize . (TODO: link to setup instructions for adding named plugins.)
-  # Template:
-  # ( plugin_name ):
-  #   enabled: ( true or false: whether to enable the plugin. )
-  #   (TODO: other configurations.)
-  forcedcache:
-    enabled: {{ "true" if forcedcache else "false" }}
-  coderunner:
-    enabled: {{ "true" if coderunner else "false" }}
-  stack:
-    enabled: {{ "true" if stack else "false" }}
-  # Extra commands to install other plugins. (TODO: link to the instructions for adding other plugins.)
-  extra: ""
 
 # Settings for test course
 testcourse:
@@ -127,8 +144,8 @@ phpfpm:
     tag: latest
   resources:
     limits:
-      cpu: 4
-      memory: 4Gi
+      cpu: 10
+      memory: 20Gi
     requests:
       cpu: 1
       memory: 1Gi
@@ -146,7 +163,7 @@ debug:
       cpu: 1
       memory: 4Gi
     requests:
-      cpu: 1
+      cpu: 500m
       memory: 1Gi
 
 # Settings for redis
@@ -157,7 +174,7 @@ redis:
     tag: 7.0.11-alpine3.18
   resources:
     limits:
-      cpu: 1
+      cpu: 10
       memory: 4Gi
     requests:
       cpu: 1
@@ -209,11 +226,11 @@ pvc:
   moodledata:
     storageClassName: microk8s-hostpath
     accessMode: ReadWriteOnce
-    size: 4G
+    size: 10G
   mysql:
     storageClassName: microk8s-hostpath
     accessMode: ReadWriteOnce
-    size: 4G
+    size: 10G
 
 # Configuration file contents
 etc:
@@ -227,13 +244,3 @@ etc:
   redisconf: ""
   forcedcachejson: ""
 
-# Docker-compose setting for the setup/test environment.
-# (TODO: link to the instructions for setting up/testing equiz with docker-compose.)
-{%- set dc = { 'protocol': 'http', 'host': 'localhost', 'port': '8080' } %}
-dc:
-  protocol: {{ dc['protocol'] }} 
-  host: {{ dc['host'] }}
-  port: {{ dc['port'] }}
-  env:
-    phpfpminit:
-      WWWROOT: "{{ dc['protocol'] }}://{{ dc['host'] }}{% if dc['port'] -%}:{{ dc['port'] }}{%- endif %}"
