@@ -1,5 +1,3 @@
-# A sample config file for production
-
 # *** IMPORTANT ***
 #
 #   - For security reason, change the secrets to your own secrets before deployment.
@@ -122,7 +120,7 @@ mariadb:
   resources:
     limits:
       cpu: 4
-      memory: 4Gi
+      memory: 10Gi
     requests:
       cpu: 1
       memory: 1Gi
@@ -134,7 +132,7 @@ nginx:
     tag: 1.25-alpine3.17
   resources:
     limits:
-      cpu: 4
+      cpu: 10
       memory: 4Gi
     requests:
       cpu: 1
@@ -148,7 +146,7 @@ phpfpm:
   resources:
     limits:
       cpu: 10
-      memory: 20Gi
+      memory: 50Gi
     requests:
       cpu: 1
       memory: 1Gi
@@ -237,11 +235,216 @@ pvc:
 
 # Configuration file contents
 etc:
-  mycnf: ""
-  php: ""
-  phpfpm: ""
-  nginx: ""
-  nginxSite: ""
+  mycnf: |-
+    # The MariaDB configuration file
+    # See https://docs.moodle.org/402/en/MySQL
+    #
+    # The MariaDB/MySQL tools read configuration files in the following order:
+    # 0. "/etc/mysql/my.cnf" symlinks to this file, reason why all the rest is read.
+    # 1. "/etc/mysql/mariadb.cnf" (this file) to set global defaults,
+    # 2. "/etc/mysql/conf.d/*.cnf" to set global options.
+    # 3. "/etc/mysql/mariadb.conf.d/*.cnf" to set MariaDB-only options.
+    # 4. "~/.my.cnf" to set user-specific options.
+    #
+    # If the same option is defined multiple times, the last one will apply.
+    #
+    # One can use all long options that the program supports.
+    # Run program with --help to get a list of available options and with
+    # --print-defaults to see which it would actually understand and use.
+    #
+    # If you are new to MariaDB, check out https://mariadb.com/kb/en/basic-mariadb-articles/
+
+    [client]
+    default-character-set = utf8mb4
+
+    [mysqld]
+    innodb_file_per_table = 1
+    innodb_buffer_pool_size = 4G
+    key_buffer_size = 10M
+    max_connections=500
+    # max_allowed_packet=128M
+    # slow_query_log = 1
+    # slow_query_log_file = /var/log/mysql/mariadb-slow.log
+    # long_query_time = 2
+
+
+    character-set-server = utf8mb4
+    collation-server = utf8mb4_unicode_ci
+    skip-character-set-client-handshake
+
+    [mysql]
+    default-character-set = utf8mb4
+
+    # This group is read both by the client and the server
+    # use it for options that affect everything
+    #
+    [client-server]
+    # Port or socket location where to connect
+    # port = 3306
+    socket = /run/mysqld/mysqld.sock
+
+    # Import all .cnf files from configuration directory
+    !includedir /etc/mysql/conf.d/
+    !includedir /etc/mysql/mariadb.conf.d/
+  php: |-
+    memory_limit = 1G
+    session.save_handler = files
+    file_uploads = On
+    session.auto_start = Off
+    max_execution_time = 600
+    date.timezone = Asia/Hong_Kong
+    upload_max_filesize = 128M
+    post_max_size = 128M
+    max_input_vars = 5000
+    display_errors = off  
+  phpfpm: |-
+    [global]
+    error_log = /usr/local/var/log/php-fpm.log
+
+    [www]
+    slowlog = /usr/local/var/log/slow.log
+    request_slowlog_timeout = 3s    
+    user = www-data
+    group = www-data
+    listen = 9000
+    listen.owner = www-data
+    listen.group = www-data
+    listen.mode = 0660
+    pm = static
+    security.limit_extensions = .php
+    pm.max_children = 1000  ; php-fpm children process for moodle uses 50M~100M
+    pm.max_requests = 1000
+    catch_workers_output = yes
+
+  nginx: |-
+    worker_processes auto;
+    pid /run/nginx.pid;
+    include /etc/nginx/modules-enabled/*.conf;
+
+    events {
+      worker_connections 1000; 
+    }
+
+    http {
+
+      ##
+      # Basic Settings
+      ##
+      sendfile on;
+      tcp_nopush on;
+      types_hash_max_size 2048;
+      # server_tokens off;
+
+      # server_names_hash_bucket_size 64;
+      # server_name_in_redirect off;
+
+      include /etc/nginx/mime.types;
+      default_type application/octet-stream;
+
+      ##
+      # SSL Settings
+      ##
+
+      ssl_protocols TLSv1 TLSv1.1 TLSv1.2 TLSv1.3; # Dropping SSLv3, ref: POODLE
+      ssl_prefer_server_ciphers on;
+
+      ##
+      # Logging Settings
+      ##
+
+      access_log /var/log/nginx/access.log;
+      error_log /var/log/nginx/error.log;
+
+      ##
+      # Gzip Settings
+      ##
+
+      gzip on;
+
+      # gzip_vary on;
+      # gzip_proxied any;
+      # gzip_comp_level 6;
+      # gzip_buffers 16 8k;
+      # gzip_http_version 1.1;
+      # gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;
+
+      ##
+      # Virtual Host Configs
+      ##
+
+      include /etc/nginx/conf.d/*.conf;
+      include /etc/nginx/sites-enabled/*;
+    }
+
+  nginxSite: |-
+    server {
+        keepalive_timeout 300;
+        keepalive_requests 100000;
+        listen 80;
+        listen [::]:80;
+        server_name localhost;
+        root /var/www/html;
+        error_page 404 /error/index.php;
+        error_page 403 =404 /error/index.php;
+
+        location / {
+            index index.php;
+            try_files $uri $uri/ /index.php?$query_string =404;
+        }
+
+        location ~ [^/]\.php(/|$) {
+            fastcgi_split_path_info  ^(.+\.php)(/.+)$;
+            fastcgi_index            index.php;
+            fastcgi_pass             phpfpm:9000;
+            include                  fastcgi_params;
+            ## See https://trac.nginx.org/nginx/ticket/321
+            try_files $fastcgi_script_name =404;
+            set $path_info $fastcgi_path_info;
+            fastcgi_param PATH_INFO $path_info;
+            fastcgi_param MOD_X_ACCEL_REDIRECT_ENABLED on;
+            # fastcgi_param   PATH_INFO       $fastcgi_path_info;
+            ##
+            fastcgi_param   SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        }
+
+        location /dataroot/ {
+            # internal;
+            alias /var/www/moodledata/; # ends with /
+        }
+
+        location /cachedir/ {
+            internal;
+            alias /var/www/moodledata/cache/; # ends with /
+        }
+
+        location /localcachedir/ {
+            internal;
+            alias /var/www/moodledata/localdircache/; # ends with /
+        }
+
+        location /tempdir/ {
+            internal;
+            alias /var/www/moodledata/temp/; # ends with /
+        }
+
+        location /filedir/ {
+            internal;
+            alias /var/www/moodledata/filedir/; # ends with /
+        }
+
+        # Hide all dot files but allow "Well-Known URIs" as per RFC 5785
+        location ~ /\.(?!well-known).* {
+            return 404;
+        }
+        
+        # This should be after the php fpm rule and very close to the last nginx ruleset.
+        # Don't allow direct access to various internal files. See MDL-69333
+        location ~ (/vendor/|/node_modules/|composer\.json|/readme|/README|readme\.txt|/upgrade\.txt|db/install\.xml|/fixtures/|/behat/|phpunit\.xml|\.lock|environment\.xml) {
+            deny all;
+            return 404;
+        }
+
+    }
   configphp: ""
   poolconf: ""
   redisconf: ""

@@ -77,10 +77,10 @@ rm.up:
 
 # To run additional setup scripts such as creating a test course/plan for jmeter load testing
 sbin:
-	# Copy additional setup scripts to phpfpm
+	@echo "Copying additional setup scripts to phpfpm" && \
 	kubectl cp -c phpfpm sbin/* $(namespace)/phpfpm-0:/usr/local/sbin/ && \
 	kubectl exec phpfpm-0 -n $(namespace) -c phpfpm -- chmod -R +x /usr/local/sbin && \
-	# Attach a shell to run scripts as www-data user
+	echo "Attaching a shell to run scripts as www-data user" && \
 	kubectl exec phpfpm-0 -it -n $(namespace) -c phpfpm -- su -s /bin/sh www-data
 
 .PHONY: up down clean upgrade delete namespace test rm.% push.% push sbin

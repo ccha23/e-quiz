@@ -8,7 +8,7 @@ php /var/www/html/admin/cli/cfg.php --name=debug --set=32767
 
 {%- with t = testcourse %}
 php /var/www/html/admin/cli/cfg.php --name=tool_generator_users_password --set='{{ t["tool_generator_users_password"] }}'
-php admin/tool/generator/cli/maketestcourse.php --shortname={{ t.shortname }} --fixeddataset --size={{ t.size}}
-php admin/tool/generator/cli/maketestplan.php --shortname={{ t.shortname }} --size={{ t.size}}
+php admin/tool/generator/cli/maketestcourse.php --shortname={{ t.shortname }} --fixeddataset --size={{ t.testcourse_size }}
+php admin/tool/generator/cli/maketestplan.php --shortname={{ t.shortname }} --size={{ t.testplan_size }}
 {%- endwith %}
 
