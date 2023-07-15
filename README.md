@@ -21,3 +21,11 @@ Overall, E-Quiz is a powerful and flexible assessment tool that allows instructo
 4. To clean up everything, run `make clean`.
 
 Note: Running any of these commands reruns `make config` to generate the distribution folder, which overwrites any edits made to the files in the folder. To preserve manual edits, navigate to the distribution folder and run the command without running `make config`.
+
+## Performance
+
+The load test results for Moodle are presented below, which were generated using a test course and JMeter test plan. To set up the test course, the [script](template/sbin/setup_testcourse.sh.j2) was utilized. The test results showcase the performance of Moodle under different user loads:
+
+- [Test results for 100 users](https://ccha23.github.io/e-quiz/100_1)
+- [Test results for 500 users](https://ccha23.github.io/e-quiz/500_1)
+- [Test results for 1000 users](https://ccha23.github.io/e-quiz/1000_1)
