@@ -65,4 +65,10 @@ clean:
 		cd .. && rm -rf $(dist_dir); \
 	fi
 
-.PHONY: config clean all up upgrade dist.%
+# Setup docker
+docker: docker.all
+docker.%:
+	@cd docker && make $*
+
+
+.PHONY: config clean all up upgrade dist.% docker.% docker

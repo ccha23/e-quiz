@@ -1,0 +1,85 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: welcome-page
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Welcome to DIVE</title>
+    </head>
+    <body>
+      <h1>Welcome to DIVE</h1>
+      <p>This is a simple welcome page served by Nginx.</p>
+    </body>
+    </html>
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: welcome-page
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: welcome-page
+  template:
+    metadata:
+      labels:
+        app: welcome-page
+    spec:
+      containers:
+      - name: welcome-page
+        image: nginx:1.25-alpine3.17-slim
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: html
+          mountPath: /usr/share/nginx/html
+        resources:
+          limits:
+            cpu: "200m"
+            memory: "256Mi"
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+      volumes:
+      - name: html
+        configMap:
+          name: welcome-page
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: welcome-page
+spec:
+  selector:
+    app: welcome-page
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: welcome-page
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-production"
+spec:
+  tls:
+    - hosts:
+        - dive.cs.cityu.edu.hk
+      secretName: letsencrypt-tls
+  rules:
+    - host: dive.cs.cityu.edu.hk
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: welcome-page
+                port:
+                  number: 80
