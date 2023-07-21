@@ -32,15 +32,15 @@ secret:
   maxima:
     MAXIMAPOOL_ADMIN_PASSWORD: *ADMINPASS
 
-{%- set email = 'support@example.com' %}       # Support email address
-{%- set protocol = 'http' %}                   # 'http' or 'https' (TODO: link to setup instructions for self-signed or lets-encrypt cert for kubernetes. See acme and myca folders.)
-{%- set host = 'localhost' %}                  # replace by the actual host name. (TODO: link to setup instructions for ingress in values.yaml file.)
-{%- set port = '' %}                           # (TODO: test if other ports such as 8181 actually works, and add appropriate instructions.)
-{%- set namespace = 'equiz' %}                 # Namespace for helm deployment of equiz to identify related resources.
-{%- set release = 'default' %}                 # Release name for helm deployment to identify related resources for different releases in the same namespace. 
-                                               # (TODO: Support multiple helm deployments to the same namespace by attaching .Release.Name to services like mariadb, phpfpm, maxima...)
-{%- set route = '/'+namespace -%}              # Must must a valid path starting with '/' mapped to the external base URL.
-{%- set registry ='localhost:32000' %}         # Used by docker to store custom built docker images for equiz so the kubernetes can pull from it. Default to the private registry accessible by kubernetes. (TODO: link to setup instructions that enable private registry.)
+{%- set email = 'support@dive.cs.cuhk.edu.hk' %}  # Support email address. A valid email needed for letsencrypt-*.
+{%- set protocol = 'https' %}                     # 'http' or 'https' (TODO: link to setup instructions for self-signed or lets-encrypt cert for kubernetes. See acme and myca folders.)
+{%- set host = 'dive.cs.cityu.edu.hk' %}          # replace by the actual host name. (TODO: link to setup instructions for ingress in values.yaml file.)
+{%- set port = '' %}                              # (TODO: test if other ports such as 8181 actually works, and add appropriate instructions.)
+{%- set namespace = 'equiz' %}                    # Namespace for helm deployment of equiz to identify related resources.
+{%- set release = 'default' %}                    # Release name for helm deployment to identify related resources for different releases in the same namespace. 
+                                                  # (TODO: Support multiple helm deployments to the same namespace by attaching .Release.Name to services like mariadb, phpfpm, maxima...)
+{%- set route = '/'+namespace -%}                 # Must must a valid path starting with '/' mapped to the external base URL.
+{%- set registry ='localhost:32000' %}            # Used by docker to store custom built docker images for equiz so the kubernetes can pull from it. Default to the private registry accessible by kubernetes. (TODO: link to setup instructions that enable private registry.)
 email: {{ email }}
 namespace: {{ namespace }}
 release: {{ release }}
@@ -49,6 +49,7 @@ port: {{ port }}
 route: {{ route }}
 registry: {{ registry.rstrip('/') }}
 proxy_body_size: 200M                           # maximum allowed size of the request body
+certificate_issuer: {{ certificate_issuer }}
 
 # Docker-compose setting for the setup/test environment.
 # (TODO: link to the instructions for setting up/testing equiz with docker-compose.)

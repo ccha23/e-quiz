@@ -7,10 +7,10 @@ data:
     <!DOCTYPE html>
     <html>
     <head>
-      <title>Welcome to DIVE</title>
+      <title>Welcome</title>
     </head>
     <body>
-      <h1>Welcome to DIVE</h1>
+      <h1>Welcome</h1>
       <p>This is a simple welcome page served by Nginx.</p>
     </body>
     </html>
@@ -60,26 +60,3 @@ spec:
   - name: http
     port: 80
     targetPort: 80
----
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: welcome-page
-  annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt-production"
-spec:
-  tls:
-    - hosts:
-        - dive.cs.cityu.edu.hk
-      secretName: letsencrypt-tls
-  rules:
-    - host: dive.cs.cityu.edu.hk
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: welcome-page
-                port:
-                  number: 80

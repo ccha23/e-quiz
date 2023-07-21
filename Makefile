@@ -70,5 +70,14 @@ docker: docker.all
 docker.%:
 	@cd docker && make $*
 
+# Setup k8s
+k8s: k8s.all
+k8s.%:
+	@cd k8s && make $*
+
+# Setup certificate for tls
+certificate: certificate.all
+certificate.%:
+	@cd certificate && make $*
 
 .PHONY: config clean all up upgrade dist.% docker.% docker

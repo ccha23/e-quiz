@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: welcome-page
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-production
+spec:
+  tls:
+    - hosts:
+        - dive.cs.cityu.edu.hk
+      secretName: letsencrypt-production-tls
+  rules:
+    - host: dive.cs.cityu.edu.hk
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: welcome-page
+                port:
+                  number: 80

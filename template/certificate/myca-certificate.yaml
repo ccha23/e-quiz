@@ -2,7 +2,6 @@ apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: myca
-  namespace: cert-manager
 spec:
   isCA: true
   commonName: myca
@@ -11,9 +10,9 @@ spec:
     algorithm: ECDSA
     size: 256
   issuerRef:
-    name: myca-ss-issuer
+    name: myca-ss
     kind: ClusterIssuer
     group: cert-manager.io
   subject:
     organizations: 
-      - myorg
+      - dive4dec
