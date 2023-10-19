@@ -1,0 +1,2 @@
+#!/bin/sh
+PATH=/tmp/sbin:$PATH su www-data -s /bin/sh -c "cd /var/www/html && /bin/sh; rm -rf /tmp/sbin"

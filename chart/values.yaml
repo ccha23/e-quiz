@@ -34,6 +34,8 @@ phpfpm:
     - +: "equiz.etc"
     - +: "equiz.html"
     - +: "equiz.moodledata"
+  envFrom:
+    - +: "equiz.phpfpminit.env"         # LTI patch needs WWWROOT
   livenessProbe:
     tcpSocket:
       port: phpfpm
