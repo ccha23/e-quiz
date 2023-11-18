@@ -10,6 +10,7 @@ The Makefile includes several targets for installing and configuring MicroK8s, i
 - `uninstall`: Uninstalls MicroK8s and removes all data.
 - `addons`: Enables all specified addons.
 - `group`: Creates a group for MicroK8s and adds the current user to it, granting permissions.
+- `network`: Apply network configurations such as iptable.
 
 The `all` target runs the targets `install addons group` in sequence, making it easy to install and configure MicroK8s with a single command. 
 

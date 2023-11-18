@@ -68,16 +68,16 @@ clean:
 # Setup docker
 docker: docker.all
 docker.%:
-	@cd docker && make $*
+	@cd node/docker && make $*
 
 # Setup k8s
 k8s: k8s.all
 k8s.%:
-	@cd k8s && make $*
+	@cd node/k8s && make $*
 
 # Setup certificate for tls
 certificate: certificate.all
 certificate.%:
 	@cd certificate && make $*
 
-.PHONY: config clean all up upgrade dist.% docker.% docker
+.PHONY: config clean all up upgrade node dist.% docker.% docker k8s.% k8s

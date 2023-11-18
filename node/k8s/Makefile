@@ -40,8 +40,9 @@ addons:
 group:
 	@echo "Creating group and granting permissions..."
 	sudo groupadd -f microk8s && \
-	sudo usermod -a -G microk8s $$USER && \
+	sudo usermod -aG microk8s $$USER && \
 	newgrp microk8s	&& \
-	microk8s status --wait-ready
+	microk8s status --wait-ready && \
+	sudo chown -R $$USER ~/.kube
 
 .PHONY: all install uninstall setup group
