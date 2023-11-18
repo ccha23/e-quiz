@@ -7,7 +7,7 @@ E-Quiz can be deployed from a node running an Ubuntu system with `make`, `docker
 To create a Multipass instance with 4GB of memory and 20GB of disk space, run the following command:
 
 ```
-multipass launch --name my-instance --mem 4G --disk 20G
+multipass launch --name my-instance --memory 4G --disk 20G
 ```
 
 In this command:
