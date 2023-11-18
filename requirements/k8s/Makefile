@@ -1,20 +1,27 @@
 # Makefile for setting up MicroK8s with addons and permissions
 # See https://microk8s.io/docs/getting-started
 
+# version 
+# See https://microk8s.io/docs/release-notes
+channel := 1.28
+
 # Addons to be enabled
-addons = cert-manager dashboard ingress registry hostpath-storage
-channel = 1.27
+addons := cert-manager dashboard ingress registry hostpath-storage
 
 # Default target runs all other targets
-all: install addons group
+all: install addons group network
 
 # Install MicroK8s and aliases for kubectl and helm
 install:
 	@echo "Installing MicroK8s..."
 	@sudo snap install microk8s --classic --channel=$(channel) && \
-	sudo microk8s --wait-ready && \
+	sudo microk8s status --wait-ready && \
 	sudo snap alias microk8s.kubectl kubectl && \
 	sudo snap alias microk8s.helm3 helm
+
+network:
+	@echo "To permit traffic between the VM and host..."
+	@sudo iptables -P FORWARD ACCEPT
 
 # Uninstall MicroK8s and remove all data
 uninstall:
@@ -34,7 +41,7 @@ group:
 	@echo "Creating group and granting permissions..."
 	sudo groupadd -f microk8s && \
 	sudo usermod -a -G microk8s $$USER && \
-	sudo chown -f -R $$USER ~/.kube && \
-	newgrp microk8s
+	newgrp microk8s	&& \
+	microk8s status --wait-ready
 
 .PHONY: all install uninstall setup group
