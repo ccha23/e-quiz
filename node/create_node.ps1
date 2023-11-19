@@ -14,12 +14,6 @@ $cpus = "1"
 $memory = "4G"
 $disk = "20G"
 
-# Set the name and specifications of the instance
-$name = "mp1"
-$cpus = "2"
-$memory = "4G"
-$disk = "20G"
-
 # Set the username and SSH key file
 $user = $env:USERNAME
 $keyfile = "$env:USERPROFILE\.ssh\multipass-ssh-key"
@@ -54,8 +48,13 @@ runcmd:
   - systemctl restart avahi-daemon
 "@
 
-echo $multipass_cloud_init | multipass launch -n $name -c $cpus -m $memory -d $disk --cloud-init - 
+if (multipass ls | Select-String $name) {
+    Write-Host "Instance '$name' already exists. To reinstall, delete it first with the command:"
+    Write-Host "multipass delete $name && multipass purge"
+} else {
+    echo $multipass_cloud_init | multipass launch -n $name -c $cpus -m $memory -d $disk --cloud-init -
+}
 
 # Display the SSH command to connect to the new instance
 Write-Host "To SSH to the new instance, run the command:"
-Write-Host "ssh $user@$name.local -i $keyfile -o StrictHostKeyChecking=no"
+Write-Host "ssh $user@$name.local -i '$keyfile' -o StrictHostKeyChecking=no"

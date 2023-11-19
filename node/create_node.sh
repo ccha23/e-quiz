@@ -23,7 +23,11 @@ keyfile="$HOME/.ssh/multipass-ssh-key"
 ssh-keygen -C "$user" -f "$keyfile"
 
 # Launch the Multipass instance with cloud-init
-multipass launch -n $name -c $cpus -m $memory -d $disk --cloud-init - <<EOF
+if multipass ls | grep -q "$name"; then
+    echo "Instance '$name' already exists. To reinstall, delete it first with the command:"
+    echo "multipass delete $name && multipass purge"
+else
+    multipass launch -n $name -c $cpus -m $memory -d $disk --cloud-init - <<EOF
 groups:
   - microk8s
   - docker
@@ -35,7 +39,7 @@ users:
     shell: /bin/bash
     sudo: ALL=(ALL) NOPASSWD:ALL
     ssh_authorized_keys:
-    - $(cat "$keyfile.pub")
+      - $(cat "$keyfile.pub")
 
 package_upgrade: true
 packages:
@@ -48,7 +52,8 @@ runcmd:
   - systemctl enable avahi-daemon
   - systemctl restart avahi-daemon
 EOF
+fi
 
 # Display the SSH command to connect to the new instance
 echo "To ssh to the new instance, run the command:"
-echo "ssh $user@$name.local -i $keyfile -o StrictHostKeyChecking=no"
+echo "ssh $user@$name.local -i '$keyfile' -o StrictHostKeyChecking=no"
