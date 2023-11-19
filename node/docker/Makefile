@@ -37,8 +37,7 @@ group:
 	@echo "Creating group and granting permissions..."
 	sudo groupadd -f docker && \
 	sudo usermod -aG docker $$USER && \
-	newgrp docker && \
-	echo
+	echo "Re-login for the change to take effect."
 
 # Declare all targets as .PHONY
 .PHONY: all config install group uninstall

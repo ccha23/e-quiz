@@ -80,4 +80,4 @@ certificate: certificate.all
 certificate.%:
 	@cd certificate && make $*
 
-.PHONY: config clean all up upgrade node dist.% docker.% docker k8s.% k8s
+.PHONY: config clean all up upgrade node dist.% docker.% docker k8s.% k8s test

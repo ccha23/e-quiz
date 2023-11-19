@@ -41,8 +41,7 @@ group:
 	@echo "Creating group and granting permissions..."
 	sudo groupadd -f microk8s && \
 	sudo usermod -aG microk8s $$USER && \
-	newgrp microk8s	&& \
-	microk8s status --wait-ready && \
-	sudo chown -R $$USER ~/.kube
+	sudo chown -R $$USER ~/.kube && \
+	echo "Re-login for the change to take effect."
 
 .PHONY: all install uninstall setup group
