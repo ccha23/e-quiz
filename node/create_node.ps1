@@ -57,4 +57,4 @@ if (multipass ls | Select-String $name) {
 
 # Display the SSH command to connect to the new instance
 Write-Host "To SSH to the new instance, run the command:"
-Write-Host "ssh $user@$name.local -i '$keyfile' -o StrictHostKeyChecking=no"
+Write-Host "ssh $user@$name.local -i '$keyfile' -o 'UserKnownHostsFile=/dev/null'"

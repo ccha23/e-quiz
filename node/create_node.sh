@@ -56,4 +56,4 @@ fi
 
 # Display the SSH command to connect to the new instance
 echo "To ssh to the new instance, run the command:"
-echo "ssh $user@$name.local -i '$keyfile' -o StrictHostKeyChecking=no"
+echo "ssh $user@$name.local -i '$keyfile' -o 'UserKnownHostsFile=/dev/null'"
