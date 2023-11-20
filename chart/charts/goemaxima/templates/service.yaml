@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "goemaxima.fullname" . }}
+  labels:
+    {{- include "goemaxima.labels" . | nindent 4 }}
+spec:
+  clusterIP: None
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: http
+      protocol: TCP
+  selector:
+    {{- include "goemaxima.selectorLabels" . | nindent 4 }}
+{{- if eq .Values.service.type "LoadBalancer" }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "goemaxima.fullname" . }}
+  labels:
+    {{- include "goemaxima.labels" . | nindent 4 }}
+spec:
+  type: LoadBalancer
+  externalTrafficPolicy: Local
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: http
+      protocol: TCP
+  selector:
+    statefulset.kubernetes.io/pod-name: {{ .Chart.Name }}-0
+{{- end }}

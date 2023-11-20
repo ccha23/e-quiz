@@ -1,6 +1,6 @@
 apiVersion: v2
-name: equiz
-description: E-Quiz Helm chart for Kubernetes
+name: goemaxima
+description: goemaxima for moodle STACK
 
 # A chart can be either an 'application' or a 'library' chart.
 #
@@ -21,20 +21,4 @@ version: 0.1.0
 # incremented each time you make changes to the application. Versions are not expected to
 # follow Semantic Versioning. They should reflect the version the application is using.
 # It is recommended to use it with quotes.
-appVersion: "0.1.0"
-
-
-dependencies:
-  - name: nginx
-  - name: mariadb
-  - name: phpfpm
-  - name: debug
-    condition: debug.enabled
-  - name: jobe
-    condition: jobe.enabled
-  - name: maxima
-    condition: maxima.enabled    
-  - name: redis
-    condition: redis.enabled 
-  - name: goemaxima
-    condition: goemaxima.enabled       
+appVersion: "1.16.0"

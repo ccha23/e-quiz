@@ -117,102 +117,62 @@ testcourse:
   testcourse_size: 'M'
   testplan_size: 'L'
 
-# Settings for the database server for moodle
-mariadb:
-  image: 
-    repository: mariadb
-    tag: 10.8.4
-  resources:
-    limits:
-      cpu: 4
-      memory: 4Gi
-    requests:
-      cpu: 1
-      memory: 1Gi
-
 # Settings for the web server for moodle
 nginx:
   image: 
     repository: nginx
     tag: 1.25-alpine3.17
-  resources:
-    limits:
-      cpu: 4
-      memory: 4Gi
-    requests:
-      cpu: 1
-      memory: 1Gi
 
-# Settings for the php engine for moodle
-phpfpm:
-  image: 
-    repository: {{ registry }}/{{ namespace }}_phpfpm
-    tag: latest
-  resources:
-    limits:
-      cpu: 10
-      memory: 20Gi
-    requests:
-      cpu: 1
-      memory: 1Gi
+# Settings for subcharts
+subcharts:
+  # Settings for the database server for moodle
+  mariadb:
+    image: 
+      repository: mariadb
+      tag: 10.8.4
 
-# Settings for the debug app
-debug:
-  enabled: false
-  image:
-    repository: alpine
-    tag: "3.18"
-    pullPolicy: Always
-  command: ["sleep", "infinity"]
-  resources:
-    limits:
-      cpu: 1
-      memory: 4Gi
-    requests:
-      cpu: 500m
-      memory: 1Gi
+  # Settings for the php engine for moodle
+  phpfpm:
+    image: 
+      repository: {{ registry }}/{{ namespace }}_phpfpm
+      tag: latest
 
-# Settings for redis
-redis:
-  enabled: {{ "true" if forcedcache else "false" }}
-  image:
-    repository: redis
-    tag: 7.0.11-alpine3.18
-  resources:
-    limits:
-      cpu: 10
-      memory: 4Gi
-    requests:
-      cpu: 1
-      memory: 1Gi
+  # Settings for the debug app
+  debug:
+    enabled: false
+    image:
+      repository: alpine
+      tag: "3.18"
+      pullPolicy: Always
+    command: ["sleep", "infinity"]
 
-# Settings for jobe
-jobe:
-  enabled: {{ "true" if coderunner else "false" }}
-  image:
-    repository: trampgeek/jobeinabox
-    tag: latest
-  resources:
-    limits:
-      cpu: 1
-      memory: 4Gi
-    requests:
-      cpu: 1
-      memory: 1Gi
+  # Settings for redis
+  redis:
+    enabled: {{ "true" if forcedcache else "false" }}
+    image:
+      repository: redis
+      tag: 7.0.11-alpine3.18
 
-# Settings for maxima
-maxima:
-  enabled: {{ "true" if stack else "false" }}
-  image:
-    repository: unihalle/maximapool
-    tag: stack-2020101501
-  resources:
-    limits:
-      cpu: 1
-      memory: 4Gi
-    requests:
-      cpu: 1
-      memory: 1Gi
+  # Settings for jobe
+  jobe:
+    enabled: {{ "true" if coderunner else "false" }}
+    image:
+      repository: trampgeek/jobeinabox
+      tag: latest
+
+  # Settings for maxima
+  maxima:
+    enabled: {{ "true" if stack else "false" }}
+    image:
+      repository: unihalle/maximapool
+      tag: stack-2020101501
+
+  # Settings for maxima
+  goemaxima:
+    enabled: {{ "true" if stack else "false" }}
+    image:
+      repository: mathinstitut/goemaxima
+      tag: 2023102700-1.1.9    
 
 global:
   # To use existing PVCs
@@ -228,15 +188,15 @@ pvc:
   html:
     storageClassName: microk8s-hostpath
     accessMode: ReadWriteOnce
-    size: 4G
+    size: 1G
   moodledata:
     storageClassName: microk8s-hostpath
     accessMode: ReadWriteOnce
-    size: 10G
+    size: 1G
   mysql:
     storageClassName: microk8s-hostpath
     accessMode: ReadWriteOnce
-    size: 10G
+    size: 1G
 
 # Configuration file contents
 etc:

@@ -5,7 +5,7 @@ metadata:
   labels:
     {{- include "maxima.labels" . | nindent 4 }}
 spec:
-  serviceName: {{ .Chart.Name }}  
+  serviceName: {{ .Chart.Name }}
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
@@ -25,13 +25,14 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      serviceAccountName: {{ include "maxima.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.image.repository }}"
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - name: http
@@ -55,8 +56,10 @@ spec:
             {{- with .Values.envFrom }}
             {{- include "equiz.parse" (list $ .) | indent 12 }}
             {{- end }}
+          {{- with .Values.resources }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+          {{- end }}
           {{- with .Values.volumeMounts }}
           volumeMounts:
             {{- include "equiz.parse" (list $ .) | indent 12 }}

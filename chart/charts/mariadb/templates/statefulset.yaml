@@ -57,9 +57,11 @@ spec:
                 name: {{ include "mariadb.fullname" $ }}
             {{- with .Values.envFrom }}
             {{- include "equiz.parse" (list $ .) | indent 12 }}
-            {{- end }}            
+            {{- end }}
+          {{- with .Values.resources }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+          {{- end }}
           {{- with .Values.volumeMounts }}
           volumeMounts:
             {{- include "equiz.parse" (list $ .) | indent 12 }}

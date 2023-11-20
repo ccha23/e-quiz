@@ -4,15 +4,16 @@
   {%- if value is mapping %}
   {{ render_section(key, value) | indent(2) }}
   {%- else %}
-  {{ key }}: {{ value | string | trim }}
+  {{ key }}: {{ value | tojson | safe }}
   {%- endif %}
 {%- endfor %}
 {%- endmacro %}
 
-{%- set services = {'phpfpm': phpfpm, 'mariadb': mariadb, 'redis': redis, 'jobe': jobe, 'maxima': maxima} %}
-{%- for svcname, svc in services.items() %}
-{{ render_section(svcname, svc) }}
-{% endfor -%}
+{% if subcharts is defined and subcharts is mapping -%}
+{% for subchart_name, subchart_data in subcharts.items() %}
+{{ render_section(subchart_name, subchart_data) }}
+{% endfor %}
+{%- endif %}
 
 {%- with svc = nginx %}
 nginx:
