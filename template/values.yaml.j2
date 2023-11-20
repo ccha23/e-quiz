@@ -1,34 +1,20 @@
-{% with svc = phpfpm -%}
-phpfpm:
-  image:
-  {%- for k, v in svc['image'].items() %}
-    {{ k }}: {{ v }}
-  {%- endfor %}
-  resources:
-  {%- for k, v in svc['resources'].items() %}
-    {{ k }}: {% if v is mapping %}
-    {%- for kk, vv in v.items() %}
-      {{ kk }}: {{ vv }}
-    {%- endfor %}{% else %}{{ v }}{% endif %}
-  {%- endfor %}
-{%- endwith %}
+{% macro render_section(section_name, section_data) -%}
+{{ section_name }}:
+{%- for key, value in section_data.items() %}
+  {%- if value is mapping %}
+  {{ render_section(key, value) | indent(2) }}
+  {%- else %}
+  {{ key }}: {{ value | string | trim }}
+  {%- endif %}
+{%- endfor %}
+{%- endmacro %}
 
-{% with svc = mariadb -%}
-mariadb:
-  image:
-  {%- for k, v in svc['image'].items() %}
-    {{ k }}: {{ v }}
-  {%- endfor %}
-  resources:
-  {%- for k, v in svc['resources'].items() %}
-    {{ k }}: {% if v is mapping %}
-    {%- for kk, vv in v.items() %}
-      {{ kk }}: {{ vv }}
-    {%- endfor %}{% else %}{{ v }}{% endif %}
-  {%- endfor %}
-{%- endwith %}
+{%- set services = {'phpfpm': phpfpm, 'mariadb': mariadb, 'redis': redis, 'jobe': jobe, 'maxima': maxima} %}
+{%- for svcname, svc in services.items() %}
+{{ render_section(svcname, svc) }}
+{% endfor -%}
 
-{% with svc = nginx -%}
+{%- with svc = nginx %}
 nginx:
   image:
   {%- for k, v in svc['image'].items() %}
@@ -48,7 +34,8 @@ nginx:
       - host: {{ host }}
         paths:
           - path: {{ route }}(/|$)(.*)
-            pathType: Prefix 
+            pathType: Prefix
+  {%- if svc.get('resources') %}            
   resources:
   {%- for k, v in svc['resources'].items() %}
     {{ k }}: {% if v is mapping %}
@@ -56,70 +43,7 @@ nginx:
       {{ kk }}: {{ vv }}
     {%- endfor %}{% else %}{{ v }}{% endif %}
   {%- endfor %}
-{%- endwith %}
-
-{% with svc = debug -%}
-debug:
-  enabled: {% if debug['enabled'] %}true{% else %}false{% endif %}
-  image:
-  {%- for k, v in svc['image'].items() %}
-    {{ k }}: {{ v }}
-  {%- endfor %}
-  resources:
-  {%- for k, v in svc['resources'].items() %}
-    {{ k }}: {% if v is mapping %}
-    {%- for kk, vv in v.items() %}
-      {{ kk }}: {{ vv }}
-    {%- endfor %}{% else %}{{ v }}{% endif %}
-  {%- endfor %}
-{%- endwith %}
-
-{% with svc = redis -%}
-redis:
-  enabled: {% if redis['enabled'] %}true{% else %}false{% endif %}
-  image:
-  {%- for k, v in svc['image'].items() %}
-    {{ k }}: {{ v }}
-  {%- endfor %}
-  resources:
-  {%- for k, v in svc['resources'].items() %}
-    {{ k }}: {% if v is mapping %}
-    {%- for kk, vv in v.items() %}
-      {{ kk }}: {{ vv }}
-    {%- endfor %}{% else %}{{ v }}{% endif %}
-  {%- endfor %}
-{%- endwith %}
-
-{% with svc = jobe -%}
-jobe:
-  enabled: {% if jobe['enabled'] %}true{% else %}false{% endif %}
-  image:
-  {%- for k, v in svc['image'].items() %}
-    {{ k }}: {{ v }}
-  {%- endfor %}
-  resources:
-  {%- for k, v in svc['resources'].items() %}
-    {{ k }}: {% if v is mapping %}
-    {%- for kk, vv in v.items() %}
-      {{ kk }}: {{ vv }}
-    {%- endfor %}{% else %}{{ v }}{% endif %}
-  {%- endfor %}
-{%- endwith %}
-
-{% with svc = maxima -%}
-maxima:
-  enabled: {% if maxima['enabled'] %}true{% else %}false{% endif %}
-  image:
-  {%- for k, v in svc['image'].items() %}
-    {{ k }}: {{ v }}
-  {%- endfor %}
-  resources:
-  {%- for k, v in svc['resources'].items() %}
-    {{ k }}: {% if v is mapping %}
-    {%- for kk, vv in v.items() %}
-      {{ kk }}: {{ vv }}
-    {%- endfor %}{% else %}{{ v }}{% endif %}
-  {%- endfor %}
+  {%- endif %}  
 {%- endwith %}
 
 etc:
