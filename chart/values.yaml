@@ -246,15 +246,15 @@ goemaxima:
   image:
     repository: mathinstitut/goemaxima
     tag: 2023102700-1.1.9
-  # volumeMounts:
-  #   - name: etc
-  #     mountPath: "/opt/maximapool/pool.conf"
-  #     subPath: "pool.conf"
-  # volumes:
-  #   - name: etc 
-  #     +: "equiz.etc"
-  # envFrom:
-  #   - +: "equiz.maxima.secret"
+  volumeMounts:
+    - name: html
+      mountPath: "/stackmaxima"
+      subPath: "question/type/stack/stack/maxima"
+  volumes:
+    - name: html 
+      +: "equiz.html"
+  envFrom:
+    - +: "equiz.goemaxima.env"
   livenessProbe:
     httpGet:
       path: /goemaxima/
@@ -335,4 +335,3 @@ env:
   mariadb:
     MYSQL_USER: *DBUSER
     MYSQL_DATABASE: *DBNAME
-

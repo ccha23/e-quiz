@@ -35,4 +35,6 @@ wget https://github.com/maths/moodle-qbehaviour_adaptivemultipart/archive/refs/t
 && rm /tmp/adaptivemultipart.tgz
 
 
-
+# Download datamining package
+mkdir -p /var/www/html/question/type/stack/stack/maxima/extra && \
+wget -P $_ https://gist.githubusercontent.com/ccha23/89360f0f855e68513950bdc1955cdfee/raw/datamining.mac

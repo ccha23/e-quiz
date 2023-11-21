@@ -90,6 +90,11 @@ secretRef:
   name: {{ include "equiz.release" . }}-maxima-secret
 {{- end }}
 
+{{- define "equiz.goemaxima.env" -}}
+configMapRef:
+  name: {{ include "equiz.release" . }}-goemaxima-env
+{{- end }}
+
 {{- define "equiz.etc" -}}
 name: etc
 configMap:

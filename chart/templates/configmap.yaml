@@ -23,3 +23,16 @@ data:
   {{ $k }}: {{ $v | quote }}
   {{- end }}
   {{- end }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "equiz.release" . }}-goemaxima-env
+  labels:
+    {{- include "equiz.labels" . | nindent 4 }}
+data:
+  {{- with .Values.env.goemaxima }}
+  {{- range $k, $v :=  .}}
+  {{ $k }}: {{ $v | quote }}
+  {{- end }}
+  {{- end }}
