@@ -1,7 +1,7 @@
 #!/bin/bash
-# https://github.com/maths/moodle-qtype_stack/archive/refs/tags/v4.3.7.tar.gz
+
 # Download STACK question type and extract it
-wget https://github.com/maths/moodle-qtype_stack/archive/refs/tags/v4.3.7.tar.gz \
+wget https://github.com/maths/moodle-qtype_stack/archive/refs/tags/v4.4.6.tar.gz \
     -O /tmp/stack.tgz \
 && mkdir -p /var/www/html/question/type/stack \
 && tar -zxf /tmp/stack.tgz \

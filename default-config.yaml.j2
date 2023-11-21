@@ -69,8 +69,8 @@ dc:
 #   - renders $(dist_dir)/phpfpm/sbin/setup_moodle.sh to setup forcedcache for the phpfpminit container, and
 #   - enable subchart redis for caching.
 {%- set forcedcache = True %}
-{%- set coderunner = False %} 
-{%- set stack = False %} 
+{%- set coderunner = True %} ###
+{%- set stack = True %} ###
 plugins:
   # Named plugins recognized by equiz to initialize . (TODO: link to setup instructions for adding named plugins.)
   # Template:
@@ -126,10 +126,10 @@ nginx:
 # Settings for subcharts
 subcharts:
   # Settings for the database server for moodle
-  mariadb:
-    image: 
-      repository: mariadb
-      tag: 10.8.4
+  # mariadb:
+  #   image: 
+  #     repository: mariadb
+  #     tag: 10.8.4
 
   # Settings for the php engine for moodle
   phpfpm:
@@ -139,7 +139,7 @@ subcharts:
 
   # Settings for the debug app
   debug:
-    enabled: false
+    enabled: true ###
     image:
       repository: alpine
       tag: "3.18"
@@ -149,30 +149,21 @@ subcharts:
   # Settings for redis
   redis:
     enabled: {{ "true" if forcedcache else "false" }}
-    image:
-      repository: redis
-      tag: 7.0.11-alpine3.18
 
   # Settings for jobe
   jobe:
     enabled: {{ "true" if coderunner else "false" }}
-    image:
-      repository: trampgeek/jobeinabox
-      tag: latest
 
-  # Settings for maxima
-  maxima:
-    enabled: {{ "true" if stack else "false" }}
-    image:
-      repository: unihalle/maximapool
-      tag: stack-2020101501
+  ## Settings for maxima
+  # maxima:
+  #   enabled: {{ "true" if stack else "false" }}
+  #   image:
+  #     repository: unihalle/maximapool
+  #     tag: stack-2020101501
 
   # Settings for maxima
   goemaxima:
-    enabled: {{ "true" if stack else "false" }}
-    image:
-      repository: mathinstitut/goemaxima
-      tag: 2023102700-1.1.9    
+    enabled: {{ "true" if stack else "false" }}  
 
 global:
   # To use existing PVCs
