@@ -29,7 +29,6 @@ RUN get_coderunner.sh
 COPY --chmod=755 bin/get_stack.sh /usr/local/sbin/
 RUN get_stack.sh
 {%- endif %}
-{{ p['extra'] }}
 {%- endwith %}
 
 # Fix issues

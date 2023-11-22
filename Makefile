@@ -60,10 +60,15 @@ sbin: dist.sbin
 
 # Remove $(dist_dir) after passing the clean command to $(dist_dir) subfolder.
 clean:
-	@if [ -d $(dist_dir) ]; then \
-		cd $(dist_dir) && make clean && \
-		cd .. && rm -rf $(dist_dir); \
+	@read -r -p "Are you sure you want to clean? [y/N] " confirm; \
+	if [ "$$confirm" = "y" ]; then \
+		echo "Cleaning..."; \
+		if [ -d $(dist_dir) ]; then \
+			cd $(dist_dir) && make clean && \
+			cd .. && rm -rf $(dist_dir); \
+		fi \
 	fi
+
 
 # Setup docker
 docker: docker.all

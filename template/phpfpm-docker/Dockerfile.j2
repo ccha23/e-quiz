@@ -61,6 +61,12 @@ RUN apk add --no-cache --virtual .build-deps \
     && apk del .build-deps \
     && rm -rf /tmp/pear/*
 
+# See https://github.com/tmuras/moosh
+RUN url='https://moodle.org/plugins/download.php/29895/moosh_moodle42_2023090700.zip' \
+    dir='/opt' \
+    && tmp="/tmp/$(basename $url)" && wget -O $tmp $url && unzip -q -o $tmp -d $dir && rm $tmp \
+    && chown -R www-data:www-data "$dir/moosh" && ln -s "$dir/moosh/moosh.php" "/usr/local/bin/moosh"
+
 FROM prod as init
 
 COPY --chmod=755 sbin/ /usr/local/sbin/

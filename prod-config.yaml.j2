@@ -1,3 +1,5 @@
+# A sample config file for production
+
 # *** IMPORTANT ***
 #
 #   - For security reason, change the secrets to your own secrets before deployment.
@@ -36,7 +38,7 @@ secret:
 {%- set protocol = 'https' %}                     # 'http' or 'https' (TODO: link to setup instructions for self-signed or lets-encrypt cert for kubernetes. See acme and myca folders.)
 {%- set host = 'dive.cs.cityu.edu.hk' %}          # replace by the actual host name. (TODO: link to setup instructions for ingress in values.yaml file.)
 {%- set port = '' %}                              # (TODO: test if other ports such as 8181 actually works, and add appropriate instructions.)
-{%- set namespace = 'equiz' %}                    # Namespace for helm deployment of equiz to identify related resources.
+{%- set namespace = 'e-quiz' %}                    # Namespace for helm deployment of equiz to identify related resources.
 {%- set release = 'default' %}                    # Release name for helm deployment to identify related resources for different releases in the same namespace. 
                                                   # (TODO: Support multiple helm deployments to the same namespace by attaching .Release.Name to services like mariadb, phpfpm, maxima...)
 {%- set route = '/'+namespace -%}                 # Must must a valid path starting with '/' mapped to the external base URL.
@@ -67,8 +69,8 @@ dc:
 #   - renders $(dist_dir)/phpfpm/sbin/setup_moodle.sh to setup forcedcache for the phpfpminit container, and
 #   - enable subchart redis for caching.
 {%- set forcedcache = True %}
-{%- set coderunner = False %} 
-{%- set stack = False %} 
+{%- set coderunner = True %}
+{%- set stack = True %}
 plugins:
   # Named plugins recognized by equiz to initialize . (TODO: link to setup instructions for adding named plugins.)
   # Template:
@@ -81,8 +83,22 @@ plugins:
     enabled: {{ "true" if coderunner else "false" }}
   stack:
     enabled: {{ "true" if stack else "false" }}
-  # Extra commands to install other plugins. (TODO: link to the instructions for adding other plugins.)
-  extra: ""
+  # Extra commands to run by /bin/sh as root towards the end of the setup.
+  # For instance, you may use moosh it to install other plugins towards the end of the setup.
+  # See https://github.com/dive4dec/moosh.
+  # (TODO: link to setup instructions.)
+  extra: |
+    # See https://moodle.org/plugins/editor_marklar
+    su -s /bin/sh www-data -c \
+    " \
+    moosh plugin-list \
+    && moosh plugin-install -fd editor_marklar && (cd /var/www/html/lib/editor && mv mudrd8mz-moodle-editor_marklar-98ed92e marklar) \
+    && moosh plugin-install -fd qtype_drawing \
+    && moosh plugin-install -fd qtype_pmatch \
+    && moosh plugin-install -fd qtype_ordering \
+    && moosh plugin-install -fd qtype_oumultiresponse \
+    && moosh plugin-install -fd qtype_combined \
+    "
 
 # Information passed to different apps as environment variables using
 # envFrom of the container spec.
@@ -107,6 +123,14 @@ env:
   mariadb:
     MYSQL_USER: *DBUSER
     MYSQL_DATABASE: *DBNAME
+  goemaxima:
+      # GOEMAXIMA_DEBUG activates some debug logs with GOEMAXIMA_DEBUG=1 (or more with GOEMAXIMA_DEBUG=2).
+      GOEMAXIMA_EXTRA_PACKAGES: "/stackmaxima/extra/datamining.mac" # is a colon-separated list of maxima packages that gets loaded at startup at the server. The load time of the packages mostly influences the startup time of the server itself and should not significantly affect the serve time of a request. The entries simply get loaded through a load(entry) call in maxima. This means you can also mount your own maxima libraries into the docker image and load them by using a path.
+      # GOEMAXIMA_NUSER sets the number of processes that can run at the same time. The maximum number is 32 and it is the default.
+      # GOEMAXIMA_QUEUE_LEN sets the target number of processes that are idle and ready to accept a request. The default is 3 (but note that there is always one extra process waiting).
+      # GOEMAXIMA_TEMP_DIR is the temporary directory where maxima processes write plots and have their named pipes. Its default is /tmp/maxima. It is the only location where the server writes to and should be mapped to tmpfs to increase speed.
+      # GOEMAXIMA_LIB_PATH is the path to a library that is loaded on startup of the maxima process. If you do not modify the container or use the webserver executable in another context than the image, you probably want to leave this variable unset. If you want to load extra packages/libraries, use the GOEMAXIMA_EXTRA_PACKAGES variable instead.    
+
 
 # Settings for test course
 testcourse:
@@ -115,102 +139,74 @@ testcourse:
   testcourse_size: 'M'
   testplan_size: 'L'
 
-# Settings for the database server for moodle
-mariadb:
-  image: 
-    repository: mariadb
-    tag: 10.8.4
-  resources:
-    limits:
-      cpu: 4
-      memory: 10Gi
-    requests:
-      cpu: 1
-      memory: 1Gi
-
 # Settings for the web server for moodle
 nginx:
   image: 
     repository: nginx
     tag: 1.25-alpine3.17
-  resources:
-    limits:
-      cpu: 10
-      memory: 4Gi
-    requests:
-      cpu: 1
-      memory: 1Gi
 
-# Settings for the php engine for moodle
-phpfpm:
-  image: 
-    repository: {{ registry }}/{{ namespace }}_phpfpm
-    tag: latest
-  resources:
-    limits:
-      cpu: 10
-      memory: 50Gi
-    requests:
-      cpu: 1
-      memory: 1Gi
+# Settings for subcharts
+subcharts:
+  # Settings for the database server for moodle
+  # mariadb:
+  #   image: 
+  #     repository: mariadb
+  #     tag: 10.8.4
 
-# Settings for the debug app
-debug:
-  enabled: false
-  image:
-    repository: alpine
-    tag: "3.18"
-    pullPolicy: Always
-  command: ["sleep", "infinity"]
-  resources:
-    limits:
-      cpu: 1
-      memory: 4Gi
-    requests:
-      cpu: 500m
-      memory: 1Gi
+  # Settings for the php engine for moodle
+  phpfpm:
+    image: 
+      repository: {{ registry }}/{{ namespace }}_phpfpm
+      tag: latest
+    resources:
+      limits:
+        cpu: 16
+        memory: 16Gi
+      requests:
+        cpu: 1
+        memory: 2Gi
 
-# Settings for redis
-redis:
-  enabled: {{ "true" if forcedcache else "false" }}
-  image:
-    repository: redis
-    tag: 7.0.11-alpine3.18
-  resources:
-    limits:
-      cpu: 10
-      memory: 4Gi
-    requests:
-      cpu: 1
-      memory: 1Gi
+  # Settings for redis
+  redis:
+    enabled: {{ "true" if forcedcache else "false" }}
+    image:
+      repository: redis
+      tag: 7.0.11-alpine3.18
+    resources:
+      limits:
+        cpu: 8
+        memory: 16Gi
+      requests:
+        cpu: 1
+        memory: 2Gi
 
-# Settings for jobe
-jobe:
-  enabled: {{ "true" if coderunner else "false" }}
-  image:
-    repository: trampgeek/jobeinabox
-    tag: latest
-  resources:
-    limits:
-      cpu: 1
-      memory: 4Gi
-    requests:
-      cpu: 1
-      memory: 1Gi
+  # Settings for jobe
+  jobe:
+    enabled: {{ "true" if coderunner else "false" }}
+    image:
+      repository: trampgeek/jobeinabox
+      tag: latest
+    resources:
+      limits:
+        cpu: 16
+        memory: 16Gi
+      requests:
+        cpu: 1
+        memory: 1Gi
 
-# Settings for maxima
-maxima:
-  enabled: {{ "true" if stack else "false" }}
-  image:
-    repository: unihalle/maximapool
-    tag: stack-2020101501
-  resources:
-    limits:
-      cpu: 1
-      memory: 4Gi
-    requests:
-      cpu: 1
-      memory: 1Gi
+  # Settings for goemaxima
+  goemaxima:
+    enabled: {{ "true" if stack else "false" }}
+    image:
+      repository: mathinstitut/goemaxima
+      tag: 2023102700-1.1.9
+    resources:
+      limits:
+        cpu: 8
+        memory: 8Gi
+      requests:
+        cpu: 1
+        memory: 1Gi
 
 global:
   # To use existing PVCs
@@ -224,15 +220,15 @@ global:
 # PVCs to be created by helm upgrade of equiz, if global.existingPvc is not specified.
 pvc:
   html:
-    storageClassName: microk8s-hostpath
+    storageClassName: home-dive0-nfs
     accessMode: ReadWriteOnce
     size: 4G
   moodledata:
-    storageClassName: microk8s-hostpath
+    storageClassName: home-dive0-nfs
     accessMode: ReadWriteOnce
     size: 10G
   mysql:
-    storageClassName: microk8s-hostpath
+    storageClassName: home-dive0-nfs
     accessMode: ReadWriteOnce
     size: 10G
 
@@ -451,7 +447,6 @@ etc:
 
     }
   configphp: ""
-  poolconf: ""
   redisconf: ""
   forcedcachejson: ""
 

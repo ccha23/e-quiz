@@ -69,14 +69,8 @@ dc:
 #   - renders $(dist_dir)/phpfpm/sbin/setup_moodle.sh to setup forcedcache for the phpfpminit container, and
 #   - enable subchart redis for caching.
 {%- set forcedcache = True %}
-{%- set coderunner = True %} ###
-{%- set stack = True %} ###
-{%- set marklar = True %}
-{%- set drawing = True %}
-{%- set pmatch = True %}
-{%- set ordering = True %}
-{%- set oumultiresponse = True %}
-{%- set combined = True %}
+{%- set coderunner = True %}
+{%- set stack = True %}
 plugins:
   # Named plugins recognized by equiz to initialize . (TODO: link to setup instructions for adding named plugins.)
   # Template:
@@ -89,43 +83,22 @@ plugins:
     enabled: {{ "true" if coderunner else "false" }}
   stack:
     enabled: {{ "true" if stack else "false" }}
-  # Extra commands to install other plugins. (TODO: link to the instructions for adding other plugins.)
+  # Extra commands to run by /bin/sh as root towards the end of the setup.
+  # For instance, you may use moosh it to install other plugins towards the end of the setup.
+  # See https://github.com/dive4dec/moosh.
+  # (TODO: link to setup instructions.)
   extra: |
-    {% if marklar -%}
-    RUN url='https://github.com/mudrd8mz/moodle-editor_marklar/archive/refs/tags/1.0.0-beta.2.tar.gz' \
-        dir=/var/www/html/lib/editor/marklar \
-     && tmp=/tmp/$(basename $url) && wget -O $tmp $url && mkdir -p $dir && tar -zxf $tmp -C $dir --strip-components=1 && rm $tmp
-    {%- endif %}
-
-    {%- if drawing %}
-    RUN url='https://github.com/ethz-let/moodle-qtype_drawing/archive/refs/tags/final-release-3.x.tar.gz' \
-        dir=/var/www/html/question/type/drawing \
-     && tmp=/tmp/$(basename $url) && wget -O $tmp $url && mkdir -p $dir && tar -zxf $tmp -C $dir --strip-components=1 && rm $tmp
-    {%- endif %}
-    
-    {%- if pmatch %}
-    RUN url='https://github.com/moodleou/moodle-qtype_pmatch/archive/refs/tags/v3.2.tar.gz' \
-        dir=/var/www/html/question/type/pmatch \
-     && tmp=/tmp/$(basename $url) && wget -O $tmp $url && mkdir -p $dir && tar -zxf $tmp -C $dir --strip-components=1 && rm $tmp
-    {%- endif %}
-    
-    {%- if ordering %}
-    RUN url='https://github.com/gbateson/moodle-qtype_ordering/archive/refs/tags/2021-06-13-(03).tar.gz' \
-        dir=/var/www/html/question/type/ordering \
-     && tmp=/tmp/$(basename $url) && wget -O $tmp $url && mkdir -p $dir && tar -zxf $tmp -C $dir --strip-components=1 && rm $tmp
-    {%- endif %}
-    
-    {%- if oumultiresponse %}
-    RUN url='https://github.com/moodleou/moodle-qtype_oumultiresponse/archive/refs/tags/v2.4.tar.gz' \
-        dir=/var/www/html/question/type/oumultiresponse \
-     && tmp=/tmp/$(basename $url) && wget -O $tmp $url && mkdir -p $dir && tar -zxf $tmp -C $dir --strip-components=1 && rm $tmp
-    {%- endif %}
-    
-    {%- if combined %}
-    RUN url='https://github.com/moodleou/moodle-qtype_combined/archive/refs/tags/v2.2.tar.gz' \
-        dir=/var/www/html/question/type/combined \
-     && tmp=/tmp/$(basename $url) && wget -O $tmp $url && mkdir -p $dir && tar -zxf $tmp -C $dir --strip-components=1 && rm $tmp
-    {%- endif %}
+    # See https://moodle.org/plugins/editor_marklar
+    su -s /bin/sh www-data -c \
+    " \
+    moosh plugin-list \
+    && moosh plugin-install -fd editor_marklar && (cd /var/www/html/lib/editor && mv mudrd8mz-moodle-editor_marklar-98ed92e marklar) \
+    && moosh plugin-install -fd qtype_drawing \
+    && moosh plugin-install -fd qtype_pmatch \
+    && moosh plugin-install -fd qtype_ordering \
+    && moosh plugin-install -fd qtype_oumultiresponse \
+    && moosh plugin-install -fd qtype_combined \
+    "
 
 # Information passed to different apps as environment variables using
 # envFrom of the container spec.
@@ -194,14 +167,8 @@ subcharts:
   jobe:
     enabled: {{ "true" if coderunner else "false" }}
 
-  ## Settings for maxima
-  # maxima:
-  #   enabled: {{ "true" if stack else "false" }}
-  #   image:
-  #     repository: unihalle/maximapool
-  #     tag: stack-2020101501
 
-  # Settings for maxima
+  # Settings for goemaxima
   goemaxima:
     enabled: {{ "true" if stack else "false" }}
 
@@ -237,7 +204,6 @@ etc:
   nginx: ""
   nginxSite: ""
   configphp: ""
-  poolconf: ""
   redisconf: ""
   forcedcachejson: ""
 

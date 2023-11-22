@@ -118,28 +118,6 @@ nginx:
     periodSeconds: 10
     failureThreshold: 50
 
-
-debug:
-  enabled: false
-  image:
-    repository: chungc/equiz_html
-    tag: latest
-    pullPolicy: Always
-  volumeMounts:
-    - name: etc
-      mountPath: /tmp/etc
-    - name: html
-      mountPath: /var/www/html
-    - name: html
-      mountPath: /var/www/moodledata
-  volumes:
-    - name: etc 
-      +: "equiz.etc"
-    - name: html 
-      +: "equiz.html"
-    - name: moodledata 
-      +: "equiz.moodledata"
-
 # Settings for the jobe server for coderunner
 redis:
   enabled: false
@@ -208,37 +186,6 @@ jobe:
     successThreshold: 1
     failureThreshold: 50
 
-# Setting for Maxima
-maxima:
-  enabled: false
-  fullnameOverride: "maxima"
-  image:
-    repository: unihalle/maximapool
-    tag: stack-2020101501
-  volumeMounts:
-    - name: etc
-      mountPath: "/opt/maximapool/pool.conf"
-      subPath: "pool.conf"
-  volumes:
-    - name: etc 
-      +: "equiz.etc"
-  envFrom:
-    - +: "equiz.maxima.secret"
-  livenessProbe:
-    httpGet:
-      path: /
-      port: http
-    initialDelaySeconds: 30
-    periodSeconds: 60
-    failureThreshold: 3
-  readinessProbe:
-    httpGet:
-      path: /
-      port: http
-    initialDelaySeconds: 5
-    periodSeconds: 10
-    failureThreshold: 6
-
 # Setting for goemaxima
 goemaxima:
   enabled: false
@@ -277,7 +224,6 @@ etc:
   nginx: ""
   nginxSite: ""
   configphp: ""
-  poolconf: ""
   redisconf: ""
 
 pvc:
@@ -311,8 +257,6 @@ secret:
   mariadb:
     MYSQL_ROOT_PASSWORD: *DBPASS
     MYSQL_PASSWORD: *DBPASS
-  maxima:
-    MAXIMAPOOL_ADMIN_PASSWORD: *ADMINPASS
 
 env:
   phpfpminit:

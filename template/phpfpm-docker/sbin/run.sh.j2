@@ -36,5 +36,9 @@ su -s /bin/sh www-data -c setup_coderunner.sh
 su -s /bin/sh www-data -c setup_stack.sh
 {%- endif %}
 
+{% with p = plugins -%}
+{{ p['extra'] }}
+{% endwith -%}
+
 # Purge caches
 su -s /bin/sh www-data -c 'php /var/www/html/admin/cli/purge_caches.php'
