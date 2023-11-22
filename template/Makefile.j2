@@ -53,27 +53,9 @@ delete:
 	microk8s helm delete -n $(namespace) $(release) --wait
 
 # Cleanup
-# Remove docker-compose and helm deployments along with the persistent volumes.
-clean: rm.up rm.namespace
+# Remove docker-compose and helm deployments along with the persistent volume claims.
+clean: rm.namespace
 	@echo "Cleaning up..."
-
-# -------------------------------------------------------------
-# Test docker images with docker compose
-
-# Docker-compose up equiz
-up:
-	@echo "Running docker-compose up..."
-	docker-compose -p $(project) up --build
-
-# Docker-compose down equiz
-down:
-	@echo "Running docker-compose down..."
-	docker-compose -p $(project) down
-
-# Docker-compose down equiz and remove the volumes created
-rm.up:
-	@echo "Running docker-compose down and removing docker volumes..."
-	docker-compose -p $(project) down -v
 
 # To run additional setup scripts such as creating a test course/plan for jmeter load testing
 sbin:
@@ -84,4 +66,4 @@ sbin:
 	echo "Attaching a shell to run scripts as www-data user" && \
 	kubectl exec phpfpm-0 -it -n $(namespace) -c phpfpm -- /tmp/sbin/init
 
-.PHONY: up down clean upgrade delete namespace test rm.% push.% push sbin
+.PHONY: clean upgrade delete namespace test rm.% push.% push sbin

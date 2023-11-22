@@ -28,12 +28,8 @@ dependencies:
   - name: nginx
   - name: mariadb
   - name: phpfpm
-  - name: debug
-    condition: debug.enabled
   - name: jobe
     condition: jobe.enabled
-  - name: maxima
-    condition: maxima.enabled    
   - name: redis
     condition: redis.enabled 
   - name: goemaxima

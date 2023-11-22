@@ -72,6 +72,11 @@ dc:
 {%- set coderunner = True %} ###
 {%- set stack = True %} ###
 {%- set marklar = True %}
+{%- set drawing = True %}
+{%- set pmatch = True %}
+{%- set ordering = True %}
+{%- set oumultiresponse = True %}
+{%- set combined = True %}
 plugins:
   # Named plugins recognized by equiz to initialize . (TODO: link to setup instructions for adding named plugins.)
   # Template:
@@ -87,12 +92,39 @@ plugins:
   # Extra commands to install other plugins. (TODO: link to the instructions for adding other plugins.)
   extra: |
     {% if marklar -%}
-    RUN wget https://github.com/mudrd8mz/moodle-editor_marklar/archive/refs/tags/1.0.0-beta.2.tar.gz \
-      -O /tmp/marklar.tgz \
-      && mkdir -p /var/www/html/lib/editor/marklar \
-      && tar -zxf /tmp/marklar.tgz \
-      -C /var/www/html/lib/editor/marklar --strip-components=1 \
-      && rm /tmp/marklar.tgz
+    RUN url='https://github.com/mudrd8mz/moodle-editor_marklar/archive/refs/tags/1.0.0-beta.2.tar.gz' \
+        dir=/var/www/html/lib/editor/marklar \
+     && tmp=/tmp/$(basename $url) && wget -O $tmp $url && mkdir -p $dir && tar -zxf $tmp -C $dir --strip-components=1 && rm $tmp
+    {%- endif %}
+
+    {%- if drawing %}
+    RUN url='https://github.com/ethz-let/moodle-qtype_drawing/archive/refs/tags/final-release-3.x.tar.gz' \
+        dir=/var/www/html/question/type/drawing \
+     && tmp=/tmp/$(basename $url) && wget -O $tmp $url && mkdir -p $dir && tar -zxf $tmp -C $dir --strip-components=1 && rm $tmp
+    {%- endif %}
+    
+    {%- if pmatch %}
+    RUN url='https://github.com/moodleou/moodle-qtype_pmatch/archive/refs/tags/v3.2.tar.gz' \
+        dir=/var/www/html/question/type/pmatch \
+     && tmp=/tmp/$(basename $url) && wget -O $tmp $url && mkdir -p $dir && tar -zxf $tmp -C $dir --strip-components=1 && rm $tmp
+    {%- endif %}
+    
+    {%- if ordering %}
+    RUN url='https://github.com/gbateson/moodle-qtype_ordering/archive/refs/tags/2021-06-13-(03).tar.gz' \
+        dir=/var/www/html/question/type/ordering \
+     && tmp=/tmp/$(basename $url) && wget -O $tmp $url && mkdir -p $dir && tar -zxf $tmp -C $dir --strip-components=1 && rm $tmp
+    {%- endif %}
+    
+    {%- if oumultiresponse %}
+    RUN url='https://github.com/moodleou/moodle-qtype_oumultiresponse/archive/refs/tags/v2.4.tar.gz' \
+        dir=/var/www/html/question/type/oumultiresponse \
+     && tmp=/tmp/$(basename $url) && wget -O $tmp $url && mkdir -p $dir && tar -zxf $tmp -C $dir --strip-components=1 && rm $tmp
+    {%- endif %}
+    
+    {%- if combined %}
+    RUN url='https://github.com/moodleou/moodle-qtype_combined/archive/refs/tags/v2.2.tar.gz' \
+        dir=/var/www/html/question/type/combined \
+     && tmp=/tmp/$(basename $url) && wget -O $tmp $url && mkdir -p $dir && tar -zxf $tmp -C $dir --strip-components=1 && rm $tmp
     {%- endif %}
 
 # Information passed to different apps as environment variables using
@@ -153,15 +185,6 @@ subcharts:
     image: 
       repository: {{ registry }}/{{ namespace }}_phpfpm
       tag: latest
-
-  # Settings for the debug app
-  debug:
-    enabled: true ###
-    image:
-      repository: alpine
-      tag: "3.18"
-      pullPolicy: Always
-    command: ["sleep", "infinity"]
 
   # Settings for redis
   redis:

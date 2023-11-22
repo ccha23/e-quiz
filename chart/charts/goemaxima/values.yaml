@@ -5,10 +5,10 @@
 replicaCount: 1
 
 image:
-  repository: unihalle/maximapool
+  repository: mathinstitut/goemaxima
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: stack-2020101501
+  tag: 2023102700-1.1.9
 
 imagePullSecrets: []
 nameOverride: ""
@@ -91,6 +91,3 @@ volumeMounts: []
 livenessProbe: {}
 
 readinessProbe: {}
-
-credentials:
-  MAXIMAPOOL_ADMIN_PASSWORD: "Admin.123"
