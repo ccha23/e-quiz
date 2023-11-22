@@ -71,6 +71,7 @@ dc:
 {%- set forcedcache = True %}
 {%- set coderunner = True %} ###
 {%- set stack = True %} ###
+{%- set marklar = True %}
 plugins:
   # Named plugins recognized by equiz to initialize . (TODO: link to setup instructions for adding named plugins.)
   # Template:
@@ -84,7 +85,15 @@ plugins:
   stack:
     enabled: {{ "true" if stack else "false" }}
   # Extra commands to install other plugins. (TODO: link to the instructions for adding other plugins.)
-  extra: ""
+  extra: |
+    {% if marklar -%}
+    RUN wget https://github.com/mudrd8mz/moodle-editor_marklar/archive/refs/tags/1.0.0-beta.2.tar.gz \
+      -O /tmp/marklar.tgz \
+      && mkdir -p /var/www/html/lib/editor/marklar \
+      && tar -zxf /tmp/marklar.tgz \
+      -C /var/www/html/lib/editor/marklar --strip-components=1 \
+      && rm /tmp/marklar.tgz
+    {%- endif %}
 
 # Information passed to different apps as environment variables using
 # envFrom of the container spec.
