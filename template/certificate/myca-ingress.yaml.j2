@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: welcome-page
+  annotations:
+    cert-manager.io/cluster-issuer: myca
+spec:
+  tls:
+    - hosts:
+        - {{ host }}
+      secretName: myca-tls
+  rules:
+    - host: {{ host }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: welcome-page
+                port:
+                  number: 80

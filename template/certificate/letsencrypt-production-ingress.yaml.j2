@@ -7,10 +7,10 @@ metadata:
 spec:
   tls:
     - hosts:
-        - dive.cs.cityu.edu.hk
+        - {{ host }}
       secretName: letsencrypt-production-tls
   rules:
-    - host: dive.cs.cityu.edu.hk
+    - host: {{ host }}
       http:
         paths:
           - path: /

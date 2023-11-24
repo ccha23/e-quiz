@@ -3,14 +3,14 @@ kind: Ingress
 metadata:
   name: welcome-page
   annotations:
-    cert-manager.io/cluster-issuer: myca
+    cert-manager.io/cluster-issuer: letsencrypt-staging
 spec:
   tls:
     - hosts:
-        - dive.cs.cityu.edu.hk
-      secretName: myca-tls
+        - {{ host }}
+      secretName: letsencrypt-staging-tls
   rules:
-    - host: dive.cs.cityu.edu.hk
+    - host: {{ host }}
       http:
         paths:
           - path: /

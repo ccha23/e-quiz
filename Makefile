@@ -83,6 +83,6 @@ k8s.%:
 # Setup certificate for tls
 certificate: certificate.all
 certificate.%:
-	@cd certificate && make $*
+	@cd "$(dist_dir)/certificate" && make $*
 
-.PHONY: config clean all up upgrade node dist.% docker.% docker k8s.% k8s test
+.PHONY: config clean all up upgrade node dist.% docker.% docker k8s.% k8s test certificate.% certificate

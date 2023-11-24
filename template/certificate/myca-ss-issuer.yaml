@@ -1,7 +1,6 @@
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
 metadata:
-  name: myca
+  name: myca-ss
 spec:
-  ca:
-    secretName: myca-key-pair
+  selfSigned: {}

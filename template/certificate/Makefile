@@ -1,15 +1,21 @@
 namespace = certificate
+cm_namespace = cert-manager
+
+all: letsencrypt.production
 
 # Add the myca issuer and deploy a welcome page that requests a certificate from the issuer.
-myca: namespace add.myca-issuer add.myca-certificate ready.myca-issuer add.page rm.letsencrypt-ingress add.myca-ingress
+myca: namespace add_cm.myca-ss-issuer add_cm.myca-certificate add_cm.myca-issuer ready.myca-issuer add.page clean.ingress add.myca-ingress
 
 # Add the letsencrypt issuer and a welcome page that requests a certificate from the issuer.
-letsencrypt: namespace add.letsencrypt-issuer ready.letsencrypt-issuer add.page rm.myca-ingress add.letsencrypt-ingress
+letsencrypt.%: namespace add.page clean.ingress
+	make add_cm.letsencrypt-$*-issuer && \
+	make ready.letsencrypt-$*-issuer && \
+	make add.letsencrypt-$*-ingress
 
 # Get the myca certificate
 myca.crt: namespace add.myca-issuer add.myca-certificate
 	@echo "Retrieving myca certificate to $(CURDIR)/myca.crt...\n"
-	kubectl get secret -n cert-manager myca-key-pair -o jsonpath='{.data.ca\.crt}' | tee ./myca.crt | base64 -d
+	kubectl get secret -n $(namespace) myca-key-pair -o jsonpath='{.data.ca\.crt}' | tee ./myca.crt | base64 -d
 
 # Create the namespace if it does not exist
 namespace:
@@ -29,6 +35,10 @@ rm.namespace:
 		kubectl delete namespace $(namespace); \
     fi
 
+add_cm.%:
+	@echo "Applying $* to cert-manager namespace Kubernetes..."; \
+	kubectl apply -f $*.yaml -n $(cm_namespace)
+
 add.%:
 	@echo "Applying $* to Kubernetes..."; \
 	kubectl apply -f $*.yaml -n $(namespace)
@@ -46,6 +56,11 @@ rm.%:
 		kubectl delete -f $*.yaml; \
     fi
 
-clean: rm.namespace
+clean.ingress: rm.letsencrypt-staging-ingress rm.letsencrypt-production-ingress rm.myca-ingress
+clean.myca: rm.myca-ingress rm.myca-issuer rm.myca-certificate
+clean.letsencrypt.%: 
+	@make rm.letsencrypt-$*-ingress && \
+	make rm.letsencrypt-$*-issuer
+clean: clean.myca clean.letsencrypt.staging clean.letsencrypt.production rm.namespace
 
-.PHONY: namespace clean all rm.% add.%
+.PHONY: namespace clean all rm.% add.% add_cm.% clean.% ready.% letsencrypt.% myca
