@@ -15,14 +15,6 @@ tag := latest
 all: upgrade
 upgrade: config dist.upgrade
 
-# Test the docker images with docker-compose.
-# See docker-compose.yaml
-# NOTE: 
-#   - The command rerun `make config` to overwrite files in $(dist_dir), if they already exist. 
-#     To preserve previous configurations, run `dist.up` instead or
-#     `cd $(dist_dir)` first to run `make up`.
-up: config dist.up
-
 # Generate the configuration file $(config_file) from the default if it does not exist
 $(config_file):
 	@if [ ! -f $(config_file) ]; then \
@@ -84,4 +76,4 @@ certificate.%:
 # Attach a shell to phpfpm container to run scripts as www-data user
 shell: dist.shell
 
-.PHONY: config clean all up upgrade node dist.% docker.% docker k8s.% k8s test certificate.% certificate
+.PHONY: config clean all upgrade node dist.% docker.% docker k8s.% k8s test certificate.% certificate shell

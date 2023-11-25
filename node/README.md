@@ -8,7 +8,7 @@ E-Quiz can be deployed from a node running an Ubuntu system with `make`, `docker
 *Note:*
 - Modify the script for the desired configurations. Ensure the node has adequate memory and resources recommended for MicroK8s installation. Otherwise, the installation may get stuck, in which case you would need to add more resources and uninstall/purge Microk8s before reinstalling it again.
 
-- If the installation is successful, the node should starts running and the script should print a command to ssh into the node from the host. The script installed and configured the Avahi daemon to facilitate device discovery and communication on a local network via mDNS/DNS-SD protocol.
+- If the installation is successful, the node should start running and the script should print a command to ssh into the node from the host. The script installs and configure the Avahi daemon to facilitate device discovery and communication on a local network via mDNS/DNS-SD protocol.
 
 - A convenient way to manage the VM is to use the  [VSCode](https://code.visualstudio.com/) on the host with the extensions for [remote-ssh](https://code.visualstudio.com/docs/remote/ssh), [kubernetes](https://code.visualstudio.com/docs/azure/kubernetes), and [docker](https://code.visualstudio.com/docs/containers/overview).
 
@@ -27,7 +27,7 @@ make docker
 
 
 *Note:*
-- Restart the node for some changes to take effect:
+- Restart the node for changes to take effect:
     ```
     multipass restart equiz
     ```
