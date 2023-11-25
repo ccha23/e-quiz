@@ -54,10 +54,6 @@ dist.%:
 		echo "Run `make config` to generate the distribution folder $(dist_dir) first." && exit 1; \
 	fi
 
-# To run additional setup scripts such as creating a test course/plan for jmeter load testing
-sbin: dist.sbin
-
-
 # Remove $(dist_dir) after passing the clean command to $(dist_dir) subfolder.
 clean:
 	@read -r -p "Are you sure you want to clean? [y/N] " confirm; \
@@ -84,5 +80,8 @@ k8s.%:
 certificate: certificate.all
 certificate.%:
 	@cd "$(dist_dir)/certificate" && make $*
+
+# Attach a shell to phpfpm container to run scripts as www-data user
+shell: dist.shell
 
 .PHONY: config clean all up upgrade node dist.% docker.% docker k8s.% k8s test certificate.% certificate

@@ -50,7 +50,6 @@ host: {{ host }}
 port: {{ port }}
 route: {{ route }}
 registry: {{ registry.rstrip('/') }}
-proxy_body_size: 200M                           # maximum allowed size of the request body
 certificate_issuer: {{ certificate_issuer }}
 
 # Docker-compose setting for the setup/test environment.
@@ -83,22 +82,19 @@ plugins:
     enabled: {{ "true" if coderunner else "false" }}
   stack:
     enabled: {{ "true" if stack else "false" }}
-  # Extra commands to run by /bin/sh as root towards the end of the setup.
-  # For instance, you may use moosh it to install other plugins towards the end of the setup.
-  # See https://github.com/dive4dec/moosh.
-  # (TODO: link to setup instructions.)
-  extra: |
-    # See https://moodle.org/plugins/editor_marklar
-    su -s /bin/sh www-data -c \
-    " \
-    moosh plugin-list \
-    && moosh plugin-install -fd editor_marklar && (cd /var/www/html/lib/editor && mv mudrd8mz-moodle-editor_marklar-98ed92e marklar) \
-    && moosh plugin-install -fd qtype_drawing \
-    && moosh plugin-install -fd qtype_pmatch \
-    && moosh plugin-install -fd qtype_ordering \
-    && moosh plugin-install -fd qtype_oumultiresponse \
-    && moosh auth-manage enable lti \
-    "
+
+# Extra commands to run right after installing moodle.
+# For instance, with moosh preinstalled in the image, additional moodle plugins can be installed 
+# using the command:
+# su -s /bin/sh www-data -c "moosh plugin-list && moosh plugin-install -fd { plugin_name }"
+#
+# NOTE:
+# - The commands will be run as root towards the end of the phpfpminit container.
+#   Switch to www-data user to install moodle plugins.
+# - For other moosh (moodle shell) commands, see
+#   https://github.com/dive4dec/moosh.
+postInstallCommand: |
+  su -s /bin/sh www-data -c "moosh auth-manage enable lti"
 
 # Information passed to different apps as environment variables using
 # envFrom of the container spec.
@@ -131,27 +127,26 @@ env:
       # GOEMAXIMA_TEMP_DIR is the temporary directory where maxima processes write plots and have their named pipes. Its default is /tmp/maxima. It is the only location where the server writes to and should be mapped to tmpfs to increase speed.
       # GOEMAXIMA_LIB_PATH is the path to a library that is loaded on startup of the maxima process. If you do not modify the container or use the webserver executable in another context than the image, you probably want to leave this variable unset. If you want to load extra packages/libraries, use the GOEMAXIMA_EXTRA_PACKAGES variable instead.    
 
-
-# Settings for test course
-testcourse:
-  tool_generator_users_password: '1234'
-  shortname: 'eqtest'
-  testcourse_size: 'M'
-  testplan_size: 'L'
-
-# Settings for the web server for moodle
-nginx:
-  image: 
-    repository: nginx
-    tag: 1.25-alpine3.17
-
 # Settings for subcharts
 subcharts:
-  # Settings for the database server for moodle
-  # mariadb:
-  #   image: 
-  #     repository: mariadb
-  #     tag: 10.8.4
+  # Settings for the web server for moodle
+  nginx:
+    image: 
+      repository: nginx
+      tag: 1.25-alpine3.17
+    service:
+      port: {{ port }}
+    ingress:
+      enabled: true 
+      className: ""
+      annotations:
+        nginx.ingress.kubernetes.io/proxy-body-size: 200M
+        nginx.ingress.kubernetes.io/rewrite-target: /$2
+      hosts:
+        - host: {{ host }}
+          paths:
+            - path: {{ route }}(/|$)(.*)
+              pathType: Prefix
 
   # Settings for the php engine for moodle
   phpfpm:
@@ -159,18 +154,32 @@ subcharts:
       repository: {{ registry }}/{{ namespace }}_phpfpm
       tag: latest
 
+  # Settings for the database server for moodle
+  mariadb:
+    image: 
+    repository: mariadb
+    tag: 10.8.4
+
   # Settings for redis
   redis:
     enabled: {{ "true" if forcedcache else "false" }}
+    image: 
+      repository: redis
+      tag: 7.0.11-alpine3.18
 
   # Settings for jobe
   jobe:
     enabled: {{ "true" if coderunner else "false" }}
-
+    image: 
+      repository: trampgeek/jobeinabox
+      tag: latest
 
   # Settings for goemaxima
   goemaxima:
     enabled: {{ "true" if stack else "false" }}
+    image:
+      repository: mathinstitut/goemaxima
+      tag: 2023102700-1.1.9
 
 global:
   # To use existing PVCs
@@ -206,4 +215,3 @@ etc:
   configphp: ""
   redisconf: ""
   forcedcachejson: ""
-

@@ -15,37 +15,6 @@
 {% endfor %}
 {%- endif %}
 
-{%- with svc = nginx %}
-nginx:
-  image:
-  {%- for k, v in svc['image'].items() %}
-    {{ k }}: {{ v }}
-  {%- endfor %}
-  {%- if port %}
-  service:
-    port: {{ port }}
-  {%- endif %}
-  ingress:
-    enabled: true 
-    className: ""
-    annotations:
-      nginx.ingress.kubernetes.io/proxy-body-size: {{ proxy_body_size }}
-      nginx.ingress.kubernetes.io/rewrite-target: /$2
-    hosts:
-      - host: {{ host }}
-        paths:
-          - path: {{ route }}(/|$)(.*)
-            pathType: Prefix
-  {%- if svc.get('resources') %}            
-  resources:
-  {%- for k, v in svc['resources'].items() %}
-    {{ k }}: {% if v is mapping %}
-    {%- for kk, vv in v.items() %}
-      {{ kk }}: {{ vv }}
-    {%- endfor %}{% else %}{{ v }}{% endif %}
-  {%- endfor %}
-  {%- endif %}  
-{%- endwith %}
 
 etc:
 {%- for k, v in etc.items() %}

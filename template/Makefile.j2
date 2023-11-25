@@ -57,13 +57,14 @@ delete:
 clean: rm.namespace
 	@echo "Cleaning up..."
 
-# To run additional setup scripts such as creating a test course/plan for jmeter load testing
-sbin:
-	@echo "Copying additional setup scripts to phpfpm" && \
-	kubectl cp -c phpfpm sbin $(namespace)/phpfpm-0:/tmp/sbin && \
-	kubectl exec phpfpm-0 -n $(namespace) -c phpfpm -- chown -R www-data /tmp/sbin && \
-	kubectl exec phpfpm-0 -n $(namespace) -c phpfpm -- chmod -R 700 /tmp/sbin && \
+# Attach a shell to phpfpm container to run scripts as www-data user 
+# to creating courses, install plugins, ...
+# Files in attach/ will be attached to /attach/ in the container during the lifetime of the shell.
+shell:
+	@echo "Copying files to /attach in phpfpm..." && \
+	kubectl cp --no-preserve=true -c phpfpm attach $(namespace)/phpfpm-0:/ && \
 	echo "Attaching a shell to run scripts as www-data user" && \
-	kubectl exec phpfpm-0 -it -n $(namespace) -c phpfpm -- /tmp/sbin/init
+	kubectl exec phpfpm-0 -it -n $(namespace) -c phpfpm -- /bin/bash /attach/init.sh
 
-.PHONY: clean upgrade delete namespace test rm.% push.% push sbin
+
+.PHONY: clean upgrade delete namespace test rm.% push.% push
