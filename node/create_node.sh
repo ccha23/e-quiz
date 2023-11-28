@@ -48,7 +48,7 @@ packages:
   - avahi-utils
 
 runcmd:
-  - sudo sed -i 's/#domain=local/domain=local/' /etc/avahi/avahi-daemon.conf
+  - sudo sed -i 's/#domain-name=local/domain-name=local/' /etc/avahi/avahi-daemon.conf
   - systemctl enable avahi-daemon
   - systemctl restart avahi-daemon
 EOF
