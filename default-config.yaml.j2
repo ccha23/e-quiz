@@ -52,17 +52,6 @@ route: {{ route }}
 registry: {{ registry.rstrip('/') }}
 certificate_issuer: {{ certificate_issuer }}
 
-# Docker-compose setting for the setup/test environment.
-# (TODO: link to the instructions for setting up/testing equiz with docker-compose.)
-{%- set dc = { 'protocol': 'http', 'host': 'localhost', 'port': '8080' } %}
-dc:
-  protocol: {{ dc['protocol'] }} 
-  host: {{ dc['host'] }}
-  port: {{ dc['port'] }}
-  env:
-    phpfpminit:
-      WWWROOT: "{{ dc['protocol'] }}://{{ dc['host'] }}{% if dc['port'] -%}:{{ dc['port'] }}{%- endif %}"
-
 # Settings for installing/configuring moodle plugins. E.g., enable forcedcache by setting forcedcache = True, which
 #   - renders $(dist_dir)/html/Dockerfile to download forcedcache plugin files,
 #   - renders $(dist_dir)/phpfpm/sbin/setup_moodle.sh to setup forcedcache for the phpfpminit container, and
