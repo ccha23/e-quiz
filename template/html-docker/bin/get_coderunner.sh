@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Download CodeRunner question type and extract it
-wget https://github.com/trampgeek/moodle-qtype_coderunner/archive/refs/tags/5.2.2.tar.gz \
+wget https://github.com/trampgeek/moodle-qtype_coderunner/archive/refs/tags/v5.2.2.tar.gz \
     -O /tmp/coderunner.tgz \
 && mkdir -p /var/www/html/question/type/coderunner \
 && tar -zxf /tmp/coderunner.tgz \
