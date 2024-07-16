@@ -1,0 +1,30 @@
+apiVersion: v1
+entries:
+  equiz:
+  - apiVersion: v2
+    appVersion: 0.1.0
+    created: "2024-07-16T06:02:44.484097115Z"
+    dependencies:
+    - name: nginx
+      repository: ""
+    - name: mariadb
+      repository: ""
+    - name: phpfpm
+      repository: ""
+    - condition: jobe.enabled
+      name: jobe
+      repository: ""
+    - condition: redis.enabled
+      name: redis
+      repository: ""
+    - condition: goemaxima.enabled
+      name: goemaxima
+      repository: ""
+    description: E-Quiz Helm chart for Kubernetes
+    digest: ced435f57039cd9bd721da3b25d15630579ccbc19865b853740217f985fc51f9
+    name: equiz
+    type: application
+    urls:
+    - https://ccha23.github.io/e-quiz/equiz-0.1.0.tgz
+    version: 0.1.0
+generated: "2024-07-16T06:02:44.479712905Z"
