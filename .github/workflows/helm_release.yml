@@ -1,0 +1,51 @@
+name: Release Helm Chart
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'chart/**'
+  workflow_dispatch:
+
+jobs:
+  release-chart:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetch all history for .GitInfo and .NextVersion calculation
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+
+      - name: Install Helm
+        run: |
+          curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+          chmod 700 get_helm.sh
+          ./get_helm.sh
+
+      - name: Package Helm Chart
+        run: |
+          helm package chart --destination .deploy
+
+      - name: Checkout gh-pages branch
+        uses: actions/checkout@v4
+        with:
+          ref: 'gh-pages'
+          path: 'gh-pages'
+
+      - name: Copy Helm package to gh-pages
+        run: |
+          cp .deploy/*.tgz gh-pages/
+
+      - name: Update Helm repo index
+        run: |
+          cd gh-pages
+          helm repo index . --url https://ccha23.github.io/e-quiz/
+          git add .
+          git commit -m "Release new Helm chart version"
+          git push origin gh-pages
