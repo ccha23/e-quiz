@@ -1,4 +1,4 @@
-FROM php:8.1-fpm-alpine3.18 as prod
+FROM php:8.1-fpm-alpine3.18 AS prod
 
 RUN apk add --no-cache --virtual .build-deps \
         $PHPIZE_DEPS \
@@ -69,7 +69,7 @@ RUN apk add --no-cache bash && \
     && tmp="/tmp/$(basename $url)" && wget -O $tmp $url && unzip -q -o $tmp -d $dir && rm $tmp \
     && chown -R www-data:www-data "$dir/moosh" && ln -s "$dir/moosh/moosh.php" "/usr/local/bin/moosh"
 
-FROM prod as init
+FROM prod AS init
 
 COPY --chmod=755 sbin/ /usr/local/sbin/
 
@@ -97,7 +97,7 @@ ENTRYPOINT []
 
 CMD ["run.sh"]
 
-{# FROM init as debugger
+{# FROM init AS debugger
 
 USER root
 

@@ -1,11 +1,11 @@
 # Abolute paths to: 
 #   - template directory
-template_dir:= $(CURDIR)/template
+template_dir ?= $(CURDIR)/template
 #   - distribution directory
-dist_dir := $(CURDIR)/dist
+dist_dir ?= $(CURDIR)/dist
 #   - configuration file
-config_file := $(CURDIR)/config.yaml.j2
-tag := latest
+config_file ?= $(CURDIR)/config.yaml.j2
+tag ?= latest
 
 # Helm upgrade/install equiz.
 # NOTE: 

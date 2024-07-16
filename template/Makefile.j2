@@ -1,12 +1,14 @@
 # namespace for the helm deployment
-namespace := {{ namespace }}
+namespace ?= {{ namespace }}
 # release name for the helm deployment
-release := {{ release }}
+release ?= {{ release }}
 # registry name to push docker images built for equiz
-registry := {{ registry }}
+registry ?= {{ registry }}
 # project name used for docker-compose and the prefix for images built for equiz such as html, phpfpminit, and phpfpm.
-project := {{ namespace }}
-tag := latest
+project ?= {{ namespace }}
+tag ?= latest
+# e-quiz helm chart
+chart ?= ../chart
 
 # Build and push docker images for equiz
 push.%:
