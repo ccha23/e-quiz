@@ -38,12 +38,12 @@ rm.namespace:
 # Helm upgrade equiz
 upgrade: namespace push
 	@echo "Helm upgrading $(release) in $(namespace)..." && \
-	microk8s helm upgrade -i -n $(namespace) $(release) ../chart -f values.yaml --wait
+	microk8s helm upgrade -i -n $(namespace) $(release) $(chart) -f values.yaml --wait
 
 # Helm test upgrade
 test:
 	@echo "Helm test upgrading $(release) in $(namespace)..."
-	microk8s helm upgrade -i -n $(namespace) $(release) ../chart -f values.yaml --wait --dry-run --debug
+	microk8s helm upgrade -i -n $(namespace) $(release) $(chart) -f values.yaml --wait --dry-run --debug
 
 # Get the helm deployment and resources created
 status:

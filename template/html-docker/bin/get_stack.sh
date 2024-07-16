@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # Download STACK question type and extract it
-wget https://github.com/maths/moodle-qtype_stack/archive/refs/tags/v4.4.6.tar.gz \
+# See https://github.com/maths/moodle-qtype_stack/tags
+wget https://github.com/maths/moodle-qtype_stack/archive/refs/tags/v4.6.0.tar.gz \
     -O /tmp/stack.tgz \
 && mkdir -p /var/www/html/question/type/stack \
 && tar -zxf /tmp/stack.tgz \
@@ -9,6 +10,7 @@ wget https://github.com/maths/moodle-qtype_stack/archive/refs/tags/v4.4.6.tar.gz
 && rm /tmp/stack.tgz
 
 # Download STACK explicitvaildate behaviour and extract it
+# See https://github.com/maths/moodle-qbehaviour_dfexplicitvaildate/tags
 wget https://github.com/maths/moodle-qbehaviour_dfexplicitvaildate/archive/refs/tags/v4.2.2.tar.gz \
     -O /tmp/dfexplicitvaildate.tgz \
 && mkdir -p /var/www/html/question/behaviour/dfexplicitvaildate \
@@ -18,6 +20,7 @@ wget https://github.com/maths/moodle-qbehaviour_dfexplicitvaildate/archive/refs/
 
 
 # Download STACK dfcbmexplicitvaildate behaviour and extract it
+# See https://github.com/maths/moodle-qbehaviour_dfcbmexplicitvaildate/tags
 wget https://github.com/maths/moodle-qbehaviour_dfcbmexplicitvaildate/archive/refs/tags/v4.2.2.tar.gz \
     -O /tmp/dfcbmexplicitvaildate.tgz \
 && mkdir -p /var/www/html/question/behaviour/dfcbmexplicitvaildate \
@@ -27,6 +30,7 @@ wget https://github.com/maths/moodle-qbehaviour_dfcbmexplicitvaildate/archive/re
 
 
 # Download STACK adaptivemultipart behaviour and extract it
+# See https://github.com/maths/moodle-qbehaviour_adaptivemultipart/tags
 wget https://github.com/maths/moodle-qbehaviour_adaptivemultipart/archive/refs/tags/v4.3.8.tar.gz \
     -O /tmp/adaptivemultipart.tgz \
 && mkdir -p /var/www/html/question/behaviour/adaptivemultipart \

@@ -1,4 +1,4 @@
-FROM php:8.1-fpm-alpine3.18 AS prod
+FROM php:8.1-fpm-alpine3.20 AS prod
 
 RUN apk add --no-cache --virtual .build-deps \
         $PHPIZE_DEPS \
@@ -63,8 +63,9 @@ RUN apk add --no-cache --virtual .build-deps \
 
 
 RUN apk add --no-cache bash && \
-    # See https://github.com/tmuras/moosh
-    url='https://moodle.org/plugins/download.php/29895/moosh_moodle42_2023090700.zip' \
+    # See https://moodle.org/plugins/pluginversions.php?id=522
+    #     https://github.com/tmuras/moosh/tags
+    url='https://moodle.org/plugins/download.php/31885/moosh_moodle44_2024050100.zip' \
     dir='/opt' \
     && tmp="/tmp/$(basename $url)" && wget -O $tmp $url && unzip -q -o $tmp -d $dir && rm $tmp \
     && chown -R www-data:www-data "$dir/moosh" && ln -s "$dir/moosh/moosh.php" "/usr/local/bin/moosh"

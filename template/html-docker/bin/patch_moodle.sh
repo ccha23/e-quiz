@@ -19,7 +19,7 @@ EOF
 patch /var/www/html/admin/index.php <<'EOF'
 --- admin/index_.php
 +++ admin/index.php
-@@ -832,7 +832,7 @@
+@@ -825,7 +825,7 @@
      // remove settings that we want uninitialised
      unset_config('registerauth');
      unset_config('timezone'); // Force admin to select timezone!
@@ -28,7 +28,7 @@ patch /var/www/html/admin/index.php <<'EOF'
  }
  
  // setup critical warnings before printing admin tree block
-@@ -844,7 +844,7 @@
+@@ -837,7 +837,7 @@
  
  // Check if there are any new admin settings which have still yet to be set
  if (any_new_admin_settings($adminroot)) {
