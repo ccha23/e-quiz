@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: {{ include "equiz.fullname" . }}-moodle
+  name: {{ include "equiz.fullname" . }}-cron
   labels:
     {{- include "equiz.labels" . | nindent 4 }}
 spec:
