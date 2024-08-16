@@ -9,11 +9,11 @@ spec:
   concurrencyPolicy: "Forbid"
   jobTemplate:
     spec:
+      completions: 3
+      parallelism: 3
+      backoffLimit: 3    
       template:
         spec:
-          completions: 3
-          parallelism: 3
-          backoffLimit: 3
           containers:
           - name: moodle-cron
             image: "{{ .Values.phpfpm.image.repository }}:{{ .Values.phpfpm.image.tag | default .Subcharts.phpfpm.AppVersion }}"
