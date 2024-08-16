@@ -58,10 +58,8 @@ spec:
             {{- with .Values.envFrom }}
             {{- include "equiz.parse" (list $ .) | indent 12 }}
             {{- end }}
-          {{- with .Values.resources }}
           resources:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
+            {{- toYaml .Values.resources | nindent 12 }}
           {{- with .Values.volumeMounts }}
           volumeMounts:
             {{- include "equiz.parse" (list $ .) | indent 12 }}
