@@ -11,6 +11,7 @@ spec:
     spec:
       template:
         spec:
+          completions: 3
           parallelism: 3
           backoffLimit: 3
           containers:
