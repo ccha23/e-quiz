@@ -6,10 +6,13 @@ metadata:
     {{- include "equiz.labels" . | nindent 4 }}
 spec:
   schedule: "* * * * *"
+  concurrencyPolicy: "Forbid"
   jobTemplate:
     spec:
       template:
         spec:
+          parallelism: 3
+          backoffLimit: 3
           containers:
           - name: moodle-cron
             image: "{{ .Values.phpfpm.image.repository }}:{{ .Values.phpfpm.image.tag | default .Subcharts.phpfpm.AppVersion }}"
