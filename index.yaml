@@ -3,7 +3,7 @@ entries:
   equiz:
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2024-08-16T14:26:32.511737221Z"
+    created: "2024-08-16T14:39:32.68184396Z"
     dependencies:
     - name: nginx
       repository: ""
@@ -21,10 +21,10 @@ entries:
       name: goemaxima
       repository: ""
     description: E-Quiz Helm chart for Kubernetes
-    digest: d45ef9bc210210b3991688049a472d1db0581e539bf1ed5d8a9d40086c6ff2e7
+    digest: 78d032f00e6798374dc7f9eda4ebb5514d0e824f95a07531aaca7fd2e45a08c7
     name: equiz
     type: application
     urls:
     - https://ccha23.github.io/e-quiz/equiz-0.1.0.tgz
     version: 0.1.0
-generated: "2024-08-16T14:26:32.507293954Z"
+generated: "2024-08-16T14:39:32.678571638Z"
