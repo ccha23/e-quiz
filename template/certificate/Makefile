@@ -8,9 +8,9 @@ myca: namespace add_cm.myca-ss-issuer add_cm.myca-certificate add_cm.myca-issuer
 
 # Add the letsencrypt issuer and a welcome page that requests a certificate from the issuer.
 letsencrypt.%: namespace add.page clean.ingress
-	make add_cm.letsencrypt-$*-issuer && \
-	make ready.letsencrypt-$*-issuer && \
-	make add.letsencrypt-$*-ingress
+	$(MAKE) add_cm.letsencrypt-$*-issuer && \
+	$(MAKE) ready.letsencrypt-$*-issuer && \
+	$(MAKE) add.letsencrypt-$*-ingress
 
 # Get the myca certificate
 myca.crt: namespace add.myca-issuer add.myca-certificate
@@ -59,8 +59,8 @@ rm.%:
 clean.ingress: rm.letsencrypt-staging-ingress rm.letsencrypt-production-ingress rm.myca-ingress
 clean.myca: rm.myca-ingress rm.myca-issuer rm.myca-certificate
 clean.letsencrypt.%: 
-	@make rm.letsencrypt-$*-ingress && \
-	make rm.letsencrypt-$*-issuer
+	@$(MAKE) rm.letsencrypt-$*-ingress && \
+	$(MAKE) rm.letsencrypt-$*-issuer
 clean: clean.myca clean.letsencrypt.staging clean.letsencrypt.production rm.namespace
 
 .PHONY: namespace clean all rm.% add.% add_cm.% clean.% ready.% letsencrypt.% myca
