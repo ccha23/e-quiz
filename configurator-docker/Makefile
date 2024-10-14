@@ -12,11 +12,23 @@ name := configurator
 tag := latest
 
 # To build the main docker image with the given name and tag
-all: .built_$(name)_$(tag)
+all: build_$(name)_$(tag) .built_$(name)_$(tag)
 
 # .build_* are dummy hidden files to avoid building the image repeatedly
 .built_$(name)_%: $(src_files)
-	@docker build -t "$(name):$*" . && touch $@
+	$(docker-build)
+
+# force build of the image
+build_$(name)_%: $(src_files)
+	@if ! docker images "$(name):$*" | grep -q "$(name)"; then \
+		$(docker-build); \
+	fi
+
+# docker build command
+define docker-build
+docker build -t "$(name):$*" . && touch .built_$(name)_$*
+endef
+
 
 # Remove the dummy hidden files that would otherwise prevent the docker images from being rebuilt
 clean:
