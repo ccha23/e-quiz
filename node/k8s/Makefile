@@ -3,10 +3,10 @@
 
 # version 
 # See https://microk8s.io/docs/release-notes
-channel := 1.28
+channel := 1.31/stable
 
 # Addons to be enabled
-addons := cert-manager dashboard ingress registry hostpath-storage
+addons := cert-manager dashboard ingress registry hostpath-storage community
 
 # Default target runs all other targets
 all: install addons group network
