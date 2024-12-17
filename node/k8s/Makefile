@@ -3,7 +3,7 @@
 
 # version 
 # See https://microk8s.io/docs/release-notes
-channel := 1.31/stable
+channel := 1.32/stable
 
 # Addons to be enabled
 addons := cert-manager dashboard ingress registry hostpath-storage community
@@ -19,6 +19,8 @@ install:
 	sudo snap alias microk8s.kubectl kubectl && \
 	sudo snap alias microk8s.helm3 helm
 
+# To make it persistent
+# apt install iptables-persistent
 network:
 	@echo "To permit traffic between the VM and host..."
 	@sudo iptables -P FORWARD ACCEPT
@@ -45,4 +47,4 @@ group:
 	sudo chown -R $$USER ~/.kube && \
 	echo "Re-login for the change to take effect."	
 
-.PHONY: all install uninstall setup group
+.PHONY: all addons network install uninstall setup group
