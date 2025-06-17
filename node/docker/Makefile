@@ -39,5 +39,27 @@ group:
 	sudo usermod -aG docker $$USER && \
 	echo "Re-login for the change to take effect."
 
+# Configure Docker to allow insecure registry for MicroK8s private registry
+private-registry:
+	@echo "Configuring Docker to allow insecure registry at localhost:32000..."
+	@if [ ! -f /etc/docker/daemon.json ]; then \
+		echo '{ "insecure-registries": ["localhost:32000"] }' | sudo tee /etc/docker/daemon.json > /dev/null; \
+	else \
+		if ! command -v jq >/dev/null 2>&1; then \
+			echo "jq is required but not installed. Please install jq first."; \
+			exit 1; \
+		else \
+			if ! sudo jq empty /etc/docker/daemon.json >/dev/null 2>&1; then \
+				echo "/etc/docker/daemon.json is not a valid JSON file. Aborting."; \
+				exit 1; \
+			fi; \
+			sudo jq 'if .["insecure-registries"] then .["insecure-registries"] |= (if type=="array" then . + ["localhost:32000"] | unique else ["localhost:32000"] end) else . + {"insecure-registries": ["localhost:32000"]} end' /etc/docker/daemon.json | sudo tee /etc/docker/daemon.json.tmp > /dev/null && \
+			sudo mv /etc/docker/daemon.json.tmp /etc/docker/daemon.json; \
+		fi; \
+	fi
+	@echo "Restarting Docker..."
+	sudo systemctl restart docker
+	@echo "Docker is now configured to use the MicroK8s private registry (localhost:32000)."
+
 # Declare all targets as .PHONY
-.PHONY: all config install group uninstall
+.PHONY: all config install group uninstall private-registry

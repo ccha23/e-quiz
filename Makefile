@@ -1,4 +1,4 @@
-# Abolute paths to: 
+# Absolute paths to: 
 #   - template directory
 template_dir ?= $(CURDIR)/template
 #   - distribution directory
@@ -55,6 +55,8 @@ clean:
 			cd $(dist_dir) && make clean && \
 			cd .. && rm -rf $(dist_dir); \
 		fi \
+	else \
+		echo "Clean cancelled."; \
 	fi
 
 

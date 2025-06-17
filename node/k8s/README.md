@@ -6,13 +6,16 @@ The provided Makefile is a tool for installing and configuring MicroK8s on an Ub
 
 The Makefile includes several targets for installing and configuring MicroK8s, including:
 
-- `install`: Installs MicroK8s and aliases for `kubectl` and `helm`.
+- `install`: Installs MicroK8s.
+- `alias`: Creates aliases for `kubectl` and `helm` and enables bash auto-completion for `kubectl`.
+- `update`: Updates MicroK8s to the specified channel version.
 - `uninstall`: Uninstalls MicroK8s and removes all data.
-- `addons`: Enables all specified addons.
+- `addons`: Enables or updates all specified addons (disables and re-enables each addon).
+- `auto-completion`: Checks for and enables bash auto-completion for `kubectl`.
 - `group`: Creates a group for MicroK8s and adds the current user to it, granting permissions.
-- `network`: Apply network configurations such as iptable.
+- `network`: Applies network configurations such as iptables.
 
-The `all` target runs the targets `install addons group` in sequence, making it easy to install and configure MicroK8s with a single command. 
+The `all` target runs the targets `install alias addons network` in sequence, making it easy to install and configure MicroK8s with a single command. 
 
 ## Reference
 

@@ -2,7 +2,7 @@
 
 # Download STACK question type and extract it
 # See https://github.com/maths/moodle-qtype_stack/tags
-wget https://github.com/maths/moodle-qtype_stack/archive/refs/tags/v4.6.0.tar.gz \
+wget https://github.com/maths/moodle-qtype_stack/archive/refs/tags/v4.9.1.tar.gz \
     -O /tmp/stack.tgz \
 && mkdir -p /var/www/html/question/type/stack \
 && tar -zxf /tmp/stack.tgz \

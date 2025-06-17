@@ -1,4 +1,4 @@
-FROM alpine:3.20.1
+FROM alpine:3.22.0
 
 # Update the package manager and install Python 3.11 and pip
 RUN apk add python3 py3-pip su-exec bash
@@ -19,7 +19,7 @@ COPY --chown=equser:equser app/ /app/
 # Install required python packages
 RUN python -m venv venv && venv/bin/python -m pip install --no-cache-dir \
     jinja2==3.1.* \
-    pyyaml==6.* \
+    pyyaml==6.0.* \
     ;
 
 # Set the default command to run when the container starts

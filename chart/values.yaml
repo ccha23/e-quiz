@@ -49,7 +49,7 @@ mariadb:
   fullnameOverride: "mariadb"
   image: 
     repository: mariadb
-    tag: 10.8.4
+    tag: 11.8.2
   volumeMounts:
     - name: etc
       mountPath: /etc/mysql/my.cnf
@@ -66,7 +66,7 @@ mariadb:
     - +: "equiz.mariadb.secret"
   livenessProbe:
     exec:
-      command: ["sh", "-c", "mysqladmin status -uroot -p${MYSQL_ROOT_PASSWORD}"]
+      command: ["/usr/local/bin/healthcheck.sh", "--connect", "--innodb_initialized"]
     initialDelaySeconds: 120
     timeoutSeconds: 5
     periodSeconds: 60
@@ -74,7 +74,7 @@ mariadb:
     failureThreshold: 5
   readinessProbe:
     exec:
-      command: ["sh", "-c", "mysqladmin status -uroot -p${MYSQL_ROOT_PASSWORD}"]
+      command: ["/usr/local/bin/healthcheck.sh", "--connect", "--innodb_initialized"]
     initialDelaySeconds: 30
     timeoutSeconds: 5
     periodSeconds: 10
@@ -84,7 +84,7 @@ mariadb:
 nginx:
   image: 
     repository: nginx
-    tag: 1.25-alpine3.17
+    tag: 1.27-alpine3.21
   volumeMounts:
     - name: etc
       mountPath: /etc/nginx/nginx.conf
@@ -124,7 +124,7 @@ redis:
   fullnameOverride: "redis"
   image: 
     repository: redis
-    tag: 7.0.11-alpine3.18
+    tag: 8.0.2-alpine3.21
   volumeMounts:
     - name: etc
       mountPath: "/usr/local/etc/redis/redis.conf"

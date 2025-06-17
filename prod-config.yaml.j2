@@ -10,7 +10,7 @@
 #   - Keep the YAML anchors such as &MYPASS to avoid inconsistent values.
 #     E.g., phpfpminit app uses the same password MYPASS to access the mariadb app configured to use 
 #      - MYSQL_PASSWORD as the password for the moodle user (database) and 
-#      - MYSQL_ROOT_PASSWORD as the root password.
+#      - MYSQL_ROOT_PASSWORD and MYSQL_PWD as the root password.
 #     Similarly, keep the jinja2 rendering such as {{ host }} to ensure consistency. E.g., host is used
 #     to set the WWWROOT for moodle as well as the ingress host path.
 #
@@ -31,6 +31,7 @@ secret:
   mariadb:
     MYSQL_ROOT_PASSWORD: *DBPASS
     MYSQL_PASSWORD: *DBPASS
+    MYSQL_PWD: *DBPASS
   maxima:
     MAXIMAPOOL_ADMIN_PASSWORD: *ADMINPASS
 
@@ -122,9 +123,9 @@ subcharts:
   nginx:
     image: 
       repository: nginx
-      tag: 1.25-alpine3.17
+      tag: 1.27-alpine3.21
     service:
-      port: {{ port }}
+      port: 80
     ingress:
       enabled: true 
       className: ""
@@ -149,6 +150,7 @@ subcharts:
     image: 
       repository: {{ registry }}/{{ namespace }}_phpfpm
       tag: latest
+      pullPolicy: Always
     resources:
       limits:
         cpu: 16
@@ -157,12 +159,19 @@ subcharts:
         cpu: 1
         memory: 2Gi
 
+  # Settings for the database server for moodle
+  mariadb:
+    image: 
+      repository: mariadb
+      tag: 11.8.2
+
+
   # Settings for redis
   redis:
     enabled: {{ "true" if forcedcache else "false" }}
     image:
       repository: redis
-      tag: 7.0.11-alpine3.18
+      tag: 8.0.2-alpine3.21
     resources:
       limits:
         cpu: 8
@@ -176,6 +185,7 @@ subcharts:
     enabled: {{ "true" if coderunner else "false" }}
     image:
       repository: trampgeek/jobeinabox
+      imagePullPolicy: Always
       tag: latest
     resources:
       limits:
@@ -190,7 +200,7 @@ subcharts:
     enabled: {{ "true" if stack else "false" }}
     image:
       repository: mathinstitut/goemaxima
-      tag: 2023102700-1.1.9
+      tag: 2025040100-1.2.0
     resources:
       limits:
         cpu: 8
