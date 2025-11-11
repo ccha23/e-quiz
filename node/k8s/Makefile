@@ -3,7 +3,7 @@
 
 # version 
 # See https://microk8s.io/docs/release-notes
-channel := 1.33/stable
+channel := 1.34/stable
 
 # Addons to be enabled
 addons_list := cert-manager dashboard ingress registry hostpath-storage community
