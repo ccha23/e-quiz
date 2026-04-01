@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Fix LTI bugs https://tracker.moodle.org/browse/MDL-49171
-patch /var/www/html/lib/ltiprovider/src/OAuth/OAuthRequest.php <<'EOF'
+patch --forward /var/www/html/lib/ltiprovider/src/OAuth/OAuthRequest.php <<'EOF' || echo "LTI Patch skipped: already applied or not needed in 5.1.3"
 --- lib/ltiprovider/src/OAuth/OAuthRequest_.php
 +++ lib/ltiprovider/src/OAuth/OAuthRequest.php
 @@ -39,6 +39,8 @@
@@ -16,7 +16,7 @@ patch /var/www/html/lib/ltiprovider/src/OAuth/OAuthRequest.php <<'EOF'
 EOF
 
 # Redirect issue
-patch /var/www/html/admin/index.php <<'EOF'
+patch --forward /var/www/html/admin/index.php <<'EOF' || echo "Admin Redirect Patch skipped: already applied or not needed in 5.1.3"
 --- admin/index_.php
 +++ admin/index.php
 @@ -825,7 +825,7 @@

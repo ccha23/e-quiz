@@ -200,7 +200,7 @@ subcharts:
     enabled: {{ "true" if stack else "false" }}
     image:
       repository: mathinstitut/goemaxima
-      tag: 2025040100-1.2.0
+      tag: 2026010500-1.2.0
     resources:
       limits:
         cpu: 8
@@ -384,7 +384,7 @@ etc:
         keepalive_requests 100000;
         listen 80;
         server_name localhost;
-        root /var/www/html;
+        root /var/www/html/public;
         error_page 404 /error/index.php;
         error_page 403 =404 /error/index.php;
 
