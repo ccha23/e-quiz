@@ -2,20 +2,20 @@
 
 # Download STACK question type and extract it
 # See https://github.com/maths/moodle-qtype_stack/tags
-wget https://github.com/maths/moodle-qtype_stack/archive/refs/tags/v4.9.1.tar.gz \
+wget https://github.com/maths/moodle-qtype_stack/archive/refs/tags/v4.11.1.tar.gz \
     -O /tmp/stack.tgz \
-&& mkdir -p /var/www/html/question/type/stack \
+&& mkdir -p /var/www/html/public/question/type/stack \
 && tar -zxf /tmp/stack.tgz \
-    -C /var/www/html/question/type/stack --strip-components=1 \
+    -C /var/www/html/public/question/type/stack --strip-components=1 \
 && rm /tmp/stack.tgz
 
 # Download STACK explicitvaildate behaviour and extract it
 # See https://github.com/maths/moodle-qbehaviour_dfexplicitvaildate/tags
 wget https://github.com/maths/moodle-qbehaviour_dfexplicitvaildate/archive/refs/tags/v4.2.2.tar.gz \
     -O /tmp/dfexplicitvaildate.tgz \
-&& mkdir -p /var/www/html/question/behaviour/dfexplicitvaildate \
+&& mkdir -p /var/www/html/public/question/behaviour/dfexplicitvaildate \
 && tar -zxf /tmp/dfexplicitvaildate.tgz \
-    -C /var/www/html/question/behaviour/dfexplicitvaildate --strip-components=1 \
+    -C /var/www/html/public/question/behaviour/dfexplicitvaildate --strip-components=1 \
 && rm /tmp/dfexplicitvaildate.tgz
 
 
@@ -23,9 +23,9 @@ wget https://github.com/maths/moodle-qbehaviour_dfexplicitvaildate/archive/refs/
 # See https://github.com/maths/moodle-qbehaviour_dfcbmexplicitvaildate/tags
 wget https://github.com/maths/moodle-qbehaviour_dfcbmexplicitvaildate/archive/refs/tags/v4.2.2.tar.gz \
     -O /tmp/dfcbmexplicitvaildate.tgz \
-&& mkdir -p /var/www/html/question/behaviour/dfcbmexplicitvaildate \
+&& mkdir -p /var/www/html/public/question/behaviour/dfcbmexplicitvaildate \
 && tar -zxf /tmp/dfcbmexplicitvaildate.tgz \
-    -C /var/www/html/question/behaviour/dfcbmexplicitvaildate --strip-components=1 \
+    -C /var/www/html/public/question/behaviour/dfcbmexplicitvaildate --strip-components=1 \
 && rm /tmp/dfcbmexplicitvaildate.tgz
 
 
@@ -33,12 +33,12 @@ wget https://github.com/maths/moodle-qbehaviour_dfcbmexplicitvaildate/archive/re
 # See https://github.com/maths/moodle-qbehaviour_adaptivemultipart/tags
 wget https://github.com/maths/moodle-qbehaviour_adaptivemultipart/archive/refs/tags/v4.3.8.tar.gz \
     -O /tmp/adaptivemultipart.tgz \
-&& mkdir -p /var/www/html/question/behaviour/adaptivemultipart \
+&& mkdir -p /var/www/html/public/question/behaviour/adaptivemultipart \
 && tar -zxf /tmp/adaptivemultipart.tgz \
-    -C /var/www/html/question/behaviour/adaptivemultipart --strip-components=1 \
+    -C /var/www/html/public/question/behaviour/adaptivemultipart --strip-components=1 \
 && rm /tmp/adaptivemultipart.tgz
 
 
 # Download datamining package
-mkdir -p /var/www/html/question/type/stack/stack/maxima/extra && \
+mkdir -p /var/www/html/public/question/type/stack/stack/maxima/extra && \
 wget -P $_ https://gist.githubusercontent.com/ccha23/89360f0f855e68513950bdc1955cdfee/raw/datamining.mac

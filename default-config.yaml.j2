@@ -82,7 +82,12 @@ plugins:
 # - For other moosh (moodle shell) commands, see
 #   https://github.com/dive4dec/moosh.
 postInstallCommand: |
-  su -s /bin/sh www-data -c "moosh auth-manage enable lti"
+  MOODLE_ROOT="/var/www/html/public"
+  
+  echo "--- Final Moosh Attempt at $MOODLE_ROOT ---"
+  
+  chown -R www-data:www-data $MOODLE_ROOT
+  su -s /bin/sh www-data -c "moosh -n -l -p $MOODLE_ROOT auth-manage enable lti"
 
 # Information passed to different apps as environment variables using
 # envFrom of the container spec.
