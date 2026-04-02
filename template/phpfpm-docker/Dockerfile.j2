@@ -15,10 +15,19 @@ RUN apk add --no-cache --virtual .build-deps \
         yaml \
     && printf "%s\n" "yes" | pecl install \
         xmlrpc-1.0.0RC3 \
-        igbinary-3.2.14 \
-        redis-5.3.7 \
-        apcu-5.1.22 \
-        yaml-2.2.3 \
+		igbinary-3.2.16 \
+        redis-6.1.0 \
+        apcu-5.1.28 \
+        yaml-2.3.0 \
+	&& mkdir -p /tmp/xmlrpc \
+    && curl -fsSL https://github.com/php/pecl-networking-xmlrpc/archive/refs/heads/master.tar.gz | tar xz -C /tmp/xmlrpc --strip-components=1 \
+    && cd /tmp/xmlrpc \
+    && phpize \
+    && ./configure \
+    && make \
+    && make install \
+    && cd / \
+    && rm -rf /tmp/xmlrpc \
     && docker-php-ext-install \
         # Enabled by default in the current php image
         # iconv \
