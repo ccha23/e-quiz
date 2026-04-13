@@ -34,8 +34,8 @@ secret:
     MAXIMAPOOL_ADMIN_PASSWORD: *ADMINPASS
 
 {%- set email = '' %}                          # Support email address. A valid email needed for letsencrypt-*.
-{%- set protocol = 'http' %}                   # 'http' or 'https' (TODO: link to setup instructions for self-signed or lets-encrypt cert for kubernetes. See acme and myca folders.)
-{%- set host = 'localhost' %}                  # replace by the actual host name. (TODO: link to setup instructions for ingress in values.yaml file.)
+{%- set protocol = 'https' %}                   # 'http' or 'https' (TODO: link to setup instructions for self-signed or lets-encrypt cert for kubernetes. See acme and myca folders.)
+{%- set host = 'csapp.cs.cityu.edu.hk' %}                  # replace by the actual host name. (TODO: link to setup instructions for ingress in values.yaml file.)
 {%- set port = '' %}                           # (TODO: test if other ports such as 8181 actually works, and add appropriate instructions.)
 {%- set namespace = 'equiz' %}                 # Namespace for helm deployment of equiz to identify related resources.
 {%- set release = 'default' %}                 # Release name for helm deployment to identify related resources for different releases in the same namespace. 
