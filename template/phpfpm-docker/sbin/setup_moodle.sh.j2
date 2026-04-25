@@ -47,7 +47,7 @@ $CFG->xsendfilealiases = array(
 {% if p['forcedcache']['enabled'] -%}
 # Forced Cache
 # See https://github.com/catalyst/moodle-tool_forcedcache#configuration
-# Visit { WWWROOT }/admin/tool/forcedcache/ to check the configuration
+# Visit ${WWWROOT}/admin/tool/forcedcache/ to check the configuration
 $CFG->tool_forcedcache_config_path = '/var/www/eqconfig/forcedcache.json';
 # Comment (uncomment) the following line to disable (enable) forced caching
 $CFG->alternative_cache_factory_class = 'tool_forcedcache_cache_factory';
@@ -55,7 +55,32 @@ $CFG->alternative_cache_factory_class = 'tool_forcedcache_cache_factory';
 {%- endwith %}
 
 # Support reverse proxy
-$CFG->reverseproxy = true;
+
+# -------------------------------------------------------------
+# Reverse-proxy / SSL handling
+#
+# We do NOT enable $CFG->reverseproxy here:
+# - In MicroK8s, ingress-nginx already sets correct Host and HTTPS headers
+# - Enabling reverseproxy may cause incorrect URL rewriting in Moodle
+#
+# Only SSL termination is done at the ingress level.
+# -------------------------------------------------------------
+
+# $CFG->reverseproxy = true;  # Not required for MicroK8s ingress-nginx
+
+
+# -------------------------------------------------------------
+# Ensure Moodle works correctly when served under {{route}}
+#
+# ingress-nginx rewrites paths before forwarding requests.
+# Moodle relies on SCRIPT_NAME and REQUEST_URI being prefixed
+# correctly to generate links and handle routing.
+# -------------------------------------------------------------
+
+if (strpos($_SERVER['SCRIPT_NAME'], '{{route}}') !== 0) {
+    $_SERVER['SCRIPT_NAME'] = '{{route}}' . $_SERVER['SCRIPT_NAME'];
+    $_SERVER['REQUEST_URI'] = '{{route}}' . $_SERVER['REQUEST_URI'];
+}
 
 EEOF
 )

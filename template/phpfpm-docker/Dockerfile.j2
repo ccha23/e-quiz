@@ -1,4 +1,4 @@
-FROM php:8.3-fpm-alpine3.20 AS prod
+FROM php:8.3-fpm-alpine3.23 AS prod
 
 RUN apk add --no-cache --virtual .build-deps \
         $PHPIZE_DEPS \

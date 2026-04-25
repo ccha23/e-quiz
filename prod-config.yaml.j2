@@ -36,10 +36,10 @@ secret:
     MAXIMAPOOL_ADMIN_PASSWORD: *ADMINPASS
 
 {%- set email = 'support@dive.cs.cuhk.edu.hk' %}  # Support email address. A valid email needed for letsencrypt-*.
-{%- set protocol = 'https' %}                     # 'http' or 'https' (TODO: link to setup instructions for self-signed or lets-encrypt cert for kubernetes. See acme and myca folders.)
-{%- set host = 'csapp.cs.cityu.edu.hk' %}          # replace by the actual host name. (TODO: link to setup instructions for ingress in values.yaml file.)
+{%- set protocol = 'http' %}                      # 'http' or 'https' (TODO: link to setup instructions for self-signed or lets-encrypt cert for kubernetes. See acme and myca folders.)
+{%- set host = 'localhost' %}                     # replace by the actual host name. (TODO: link to setup instructions for ingress in values.yaml file.)
 {%- set port = '' %}                              # (TODO: test if other ports such as 8181 actually works, and add appropriate instructions.)
-{%- set namespace = 'e-quiz' %}                    # Namespace for helm deployment of equiz to identify related resources.
+{%- set namespace = 'e-quiz' %}                   # Namespace for helm deployment of equiz to identify related resources.
 {%- set release = 'default' %}                    # Release name for helm deployment to identify related resources for different releases in the same namespace. 
                                                   # (TODO: Support multiple helm deployments to the same namespace by attaching .Release.Name to services like mariadb, phpfpm, maxima...)
 {%- set route = '/'+namespace -%}                 # Must must a valid path starting with '/' mapped to the external base URL.
@@ -123,7 +123,7 @@ subcharts:
   nginx:
     image: 
       repository: nginx
-      tag: 1.27-alpine3.21
+      tag: 1.29-alpine3.23
     service:
       port: 80
     ingress:
@@ -171,7 +171,7 @@ subcharts:
     enabled: {{ "true" if forcedcache else "false" }}
     image:
       repository: redis
-      tag: 8.0.2-alpine3.21
+      tag: 8.6.2-alpine3.23
     resources:
       limits:
         cpu: 8
@@ -292,9 +292,10 @@ etc:
     file_uploads = On
     session.auto_start = Off
     max_execution_time = 600
+    max_input_time = 600
     date.timezone = Asia/Hong_Kong
-    upload_max_filesize = 128M
-    post_max_size = 128M
+    upload_max_filesize = 200M
+    post_max_size = 200M
     max_input_vars = 5000
     display_errors = off  
   phpfpm: |-
@@ -312,8 +313,8 @@ etc:
     listen.mode = 0660
     pm = static
     security.limit_extensions = .php
-    pm.max_children = 1000  ; php-fpm children process for moodle uses 50M~100M
-    pm.max_requests = 1000
+    pm.max_children = 200  ; php-fpm children process for moodle uses 50M~100M
+    pm.max_requests = 200
     catch_workers_output = yes
 
   nginx: |-
@@ -335,6 +336,7 @@ etc:
       types_hash_max_size 2048;
       # server_tokens off;
 
+      client_body_buffer_size 512k;
       client_max_body_size 200m;
 
       # server_names_hash_bucket_size 64;
@@ -380,33 +382,53 @@ etc:
 
   nginxSite: |-
     server {
-        keepalive_timeout 300;
-        keepalive_requests 100000;
-        listen 80;
-        server_name localhost;
-        root /var/www/html/public;
-        error_page 404 /error/index.php;
-        error_page 403 =404 /error/index.php;
 
+        listen 80;
+        listen [::]:80;
+        server_name localhost;
+
+        set_real_ip_from 10.0.0.0/8;
+        set_real_ip_from 172.16.0.0/12;
+        set_real_ip_from 192.168.0.0/16;
+
+        real_ip_header X-Forwarded-For;
+        real_ip_recursive on;
+
+        root /var/www/html/public;
+        
+        index index.php index.html;
+
+        location = /my/ {
+            rewrite ^ /my/index.php last;
+        }
+        
         location / {
-            index index.php;
-            try_files $uri $uri/ /index.php?$query_string =404;
+            try_files $uri $uri/ /r.php$is_args$args;
         }
 
         location ~ [^/]\.php(/|$) {
             fastcgi_split_path_info  ^(.+\.php)(/.+)$;
             fastcgi_index            index.php;
-            fastcgi_pass             phpfpm:9000;
+            fastcgi_pass             phpfpm:9000; 
+            
             include                  fastcgi_params;
-            ## See https://trac.nginx.org/nginx/ticket/321
-            try_files $fastcgi_script_name =404;
-            set $path_info $fastcgi_path_info;
-            fastcgi_param PATH_INFO $path_info;
-            fastcgi_param MOD_X_ACCEL_REDIRECT_ENABLED on;
-            # fastcgi_param   PATH_INFO       $fastcgi_path_info;
-            ##
+            fastcgi_param   PATH_INFO       $fastcgi_path_info;
             fastcgi_param   SCRIPT_FILENAME $document_root$fastcgi_script_name;
+
+
+            # For long-running Moodle operations
+            fastcgi_read_timeout 600s;
+            fastcgi_send_timeout 600s;
+            fastcgi_connect_timeout 60s;
+
+            # Prevent POST buffering failures
+            fastcgi_buffering off;
+            fastcgi_request_buffering off;
+
         }
+
+        error_page 404 /error/index.php;
+        error_page 403 =404 /error/index.php;
 
         location /dataroot/ {
             # internal;
@@ -444,6 +466,16 @@ etc:
             deny all;
             return 404;
         }
+
+        # For bulk uploads
+        client_max_body_size 200m;
+        client_body_timeout 600s;
+        client_header_timeout 600s;
+        send_timeout 600s;
+
+        keepalive_timeout 300;
+        keepalive_requests 100000;
+
 
     }
   configphp: ""
