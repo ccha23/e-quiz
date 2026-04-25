@@ -26,19 +26,20 @@ wait_db_ready.php
 if [ ! -f /var/www/html/config.php ]; then
   echo "Setting up moodle"
   su -s /bin/sh www-data -c setup_moodle.sh
+
+  {% if plugins['coderunner']['enabled'] -%}
+  su -s /bin/sh www-data -c setup_coderunner.sh
+  {%- endif %}
+
+  {% if plugins['stack']['enabled'] -%}
+  su -s /bin/sh www-data -c setup_stack.sh
+  {%- endif %}
+
+  {% if postInstallCommand is defined -%}
+  {{ postInstallCommand }}
+  {% endif -%}
+
+  # Purge caches
+  su -s /bin/sh www-data -c 'php /var/www/html/admin/cli/purge_caches.php'
+
 fi
-
-{% if plugins['coderunner']['enabled'] -%}
-su -s /bin/sh www-data -c setup_coderunner.sh
-{%- endif %}
-
-{% if plugins['stack']['enabled'] -%}
-su -s /bin/sh www-data -c setup_stack.sh
-{%- endif %}
-
-{% if postInstallCommand is defined -%}
-{{ postInstallCommand }}
-{% endif -%}
-
-# Purge caches
-su -s /bin/sh www-data -c 'php /var/www/html/admin/cli/purge_caches.php'

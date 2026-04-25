@@ -82,7 +82,12 @@ plugins:
 # - For other moosh (moodle shell) commands, see
 #   https://github.com/dive4dec/moosh.
 postInstallCommand: |
-  su -s /bin/sh www-data -c "moosh auth-manage enable lti"
+  MOODLE_ROOT="/var/www/html/public"
+  
+  echo "--- Final Moosh Attempt at $MOODLE_ROOT ---"
+  
+  chown -R www-data:www-data $MOODLE_ROOT
+  su -s /bin/sh www-data -c "moosh -n -l -p $MOODLE_ROOT auth-manage enable lti"
 
 # Information passed to different apps as environment variables using
 # envFrom of the container spec.
@@ -121,7 +126,7 @@ subcharts:
   nginx:
     image: 
       repository: nginx
-      tag: 1.27-alpine3.21
+      tag: 1.29-alpine3.23
     service:
       port: 80
     ingress:
@@ -154,7 +159,7 @@ subcharts:
     enabled: {{ "true" if forcedcache else "false" }}
     image: 
       repository: redis
-      tag: 8.0.2-alpine3.21
+      tag: 8.6.2-alpine3.23
 
   # Settings for jobe
   jobe:
@@ -169,7 +174,7 @@ subcharts:
     enabled: {{ "true" if stack else "false" }}
     image:
       repository: mathinstitut/goemaxima
-      tag: "2025040100-1.2.0"
+      tag: "2026010500-1.2.0"
 
 global:
   # To use existing PVCs
