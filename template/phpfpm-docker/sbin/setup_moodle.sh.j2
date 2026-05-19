@@ -56,6 +56,15 @@ $CFG->alternative_cache_factory_class = 'tool_forcedcache_cache_factory';
 
 # Support reverse proxy
 $CFG->reverseproxy = true;
+if (isset($_SERVER['REQUEST_URI']) && strpos($_SERVER['REQUEST_URI'], '/equiz') !== 0) {
+    $_SERVER['REQUEST_URI'] = '/equiz' . $_SERVER['REQUEST_URI'];
+}
+if (isset($_SERVER['SCRIPT_NAME']) && strpos($_SERVER['SCRIPT_NAME'], '/equiz') !== 0) {
+    $_SERVER['SCRIPT_NAME'] = '/equiz' . $_SERVER['SCRIPT_NAME'];
+}
+if (isset($_SERVER['PHP_SELF']) && strpos($_SERVER['PHP_SELF'], '/equiz') !== 0) {
+    $_SERVER['PHP_SELF'] = '/equiz' . $_SERVER['PHP_SELF'];
+}
 
 EEOF
 )
