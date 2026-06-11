@@ -33,15 +33,14 @@ secret:
   maxima:
     MAXIMAPOOL_ADMIN_PASSWORD: *ADMINPASS
 
-{%- set email = '' %}                          # Support email address. A valid email needed for letsencrypt-*.
-{%- set protocol = 'http' %}                   # 'http' or 'https' (TODO: link to setup instructions for self-signed or lets-encrypt cert for kubernetes. See acme and myca folders.)
-{%- set host = 'localhost' %}                  # replace by the actual host name. (TODO: link to setup instructions for ingress in values.yaml file.)
-{%- set port = '' %}                           # (TODO: test if other ports such as 8181 actually works, and add appropriate instructions.)
+{%- set email = '' %}                          # Support email address. Required for Let's Encrypt certificates.
+{%- set protocol = 'http' %}                   # 'http' for local/dev; set to 'https' for production with TLS. For certificate setup (Let's Encrypt or self-signed CA), see the [certificate/README.md](certificate/README.md) in the distribution directory or https://microk8s.io/docs/addon-cert-manager#lets-encrypt-certificates.
+{%- set host = 'localhost' %}                  # Hostname for the ingress rule. Set to your domain (e.g., socratic.cs.cityu.edu.hk) for production. The ingress is auto-configured under subcharts.nginx.ingress with rewrite-target and path matching. For details, see https://kubernetes.io/docs/concepts/services-networking/ingress/.
+{%- set port = '' %}                           # Non-empty value (e.g., '8181') is appended to WWWROOT and the ingress host. The internal nginx service always listens on port 80; this only affects the externally exposed URL. If your ingress controller supports NodePort/LoadBalancer, configure it separately.
 {%- set namespace = 'equiz' %}                 # Namespace for helm deployment of equiz to identify related resources.
-{%- set release = 'default' %}                 # Release name for helm deployment to identify related resources for different releases in the same namespace. 
-                                               # (TODO: Support multiple helm deployments to the same namespace by attaching .Release.Name to services like mariadb, phpfpm, maxima...)
+{%- set release = 'default' %}                 # Release name for helm deployment to identify related resources for different releases in the same namespace. Currently, subcharts use fixed fullnameOverride values (phpfpm, mariadb, redis, jobe, goemaxima) so service names do not include the release name. To deploy multiple releases in the same namespace, remove those overrides so K8s services are namespaced by release, and ensure each release uses its own PVCs (set global.existingPvc).
 {%- set route = '/'+namespace -%}              # Must must a valid path starting with '/' mapped to the external base URL.
-{%- set registry ='localhost:32000' %}         # Used by docker to store custom built docker images for equiz so the kubernetes can pull from it. Default to the private registry accessible by kubernetes. (TODO: link to setup instructions that enable private registry.)
+{%- set registry ='localhost:32000' %}         # Docker registry for custom-built equiz images. To enable a private registry in microk8s, run `microk8s enable registry` (see https://microk8s.io/docs/addon-registry). For other K8s distributions, configure a pullSecret or host-aliased registry.
 email: {{ email }}
 namespace: {{ namespace }}
 release: {{ release }}
@@ -59,11 +58,19 @@ certificate_issuer: {{ certificate_issuer }}
 {%- set coderunner = True %}
 {%- set stack = True %}
 plugins:
-  # Named plugins recognized by equiz to initialize . (TODO: link to setup instructions for adding named plugins.)
+  # Named plugins recognized by equiz to initialize Moodle during the phpfpminit phase.
+  # Currently supported plugins: forcedcache, coderunner, stack.
+  #
   # Template:
-  # ( plugin_name ):
-  #   enabled: ( true or false: whether to enable the plugin. )
-  #   (TODO: other configurations.)
+  #   ( plugin_name ):
+  #     enabled: ( true or false: whether to enable the plugin. )
+  #     # Additional plugin-specific configurations may be added here.
+  #     # To add a new named plugin:
+  #     #   1. Add a {%- set plugin_name = True %} variable above.
+  #     #   2. Add a download script in template/html-docker/bin/get_plugin_name.sh.
+  #     #   3. Add setup logic in template/phpfpm-docker/sbin/setup_moodle.sh.j2.
+  #   4. Reference it in the plugins section below with enabled: {{ "true" if plugin_name else "false" }}.
+  #     #   5. If the plugin requires a subchart (e.g., redis for forcedcache), wire it under subcharts.
   forcedcache:
     enabled: {{ "true" if forcedcache else "false" }}
   coderunner:
