@@ -81,7 +81,9 @@ tolerations: []
 
 affinity: {}
 
-env: []
+env:
+  - name: NGX_LISTEN_ON_IPV6
+    value: "off"
 
 volumes: []
 

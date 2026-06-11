@@ -8,7 +8,7 @@ image:
   repository: mathinstitut/goemaxima
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "2026010500-1.2.0"
+  tag: "2026042200-1.2.0"
 
 imagePullSecrets: []
 nameOverride: ""

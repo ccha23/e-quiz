@@ -2,7 +2,7 @@
 
 # Download STACK question type and extract it
 # See https://github.com/maths/moodle-qtype_stack/tags
-wget https://github.com/maths/moodle-qtype_stack/archive/refs/tags/v4.11.1.tar.gz \
+wget https://github.com/maths/moodle-qtype_stack/archive/refs/tags/v4.12.0.tar.gz \
     -O /tmp/stack.tgz \
 && mkdir -p /var/www/html/public/question/type/stack \
 && tar -zxf /tmp/stack.tgz \
@@ -37,6 +37,16 @@ wget https://github.com/maths/moodle-qbehaviour_adaptivemultipart/archive/refs/t
 && tar -zxf /tmp/adaptivemultipart.tgz \
     -C /var/www/html/public/question/behaviour/adaptivemultipart --strip-components=1 \
 && rm /tmp/adaptivemultipart.tgz
+
+
+# Download qbank_importasversion (required by STACK v4.12.0+)
+# See https://github.com/maths/moodle-qbank_importasversion/tags
+wget https://github.com/maths/moodle-qbank_importasversion/archive/refs/tags/v1.5.1.tar.gz \
+    -O /tmp/importasversion.tgz \
+&& mkdir -p /var/www/html/public/question/bank/importasversion \
+&& tar -zxf /tmp/importasversion.tgz \
+    -C /var/www/html/public/question/bank/importasversion --strip-components=1 \
+&& rm /tmp/importasversion.tgz
 
 
 # Download datamining package
