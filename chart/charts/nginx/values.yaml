@@ -89,6 +89,3 @@ volumes: []
 
 volumeMounts: []
 
-livenessProbe: {}
-
-readinessProbe: {}

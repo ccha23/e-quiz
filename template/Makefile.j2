@@ -38,7 +38,7 @@ rm.namespace:
 # Helm upgrade equiz
 upgrade: namespace push
 	@echo "Helm upgrading $(release) in $(namespace)..." && \
-	microk8s helm upgrade -i -n $(namespace) $(release) $(chart) -f values.yaml --wait
+	microk8s helm upgrade -i -n $(namespace) $(release) $(chart) -f values.yaml --wait --atomic --timeout 10m
 
 # Helm test upgrade
 test:

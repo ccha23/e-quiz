@@ -91,6 +91,3 @@ volumeMounts: []
 
 initContainers: []
 
-livenessProbe: {}
-
-readinessProbe: {}

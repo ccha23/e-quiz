@@ -39,10 +39,24 @@ phpfpm:
   livenessProbe:
     tcpSocket:
       port: phpfpm
-    initialDelaySeconds: 15
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
   readinessProbe:
     tcpSocket:
       port: phpfpm
+    initialDelaySeconds: 10
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 3
+  startupProbe:
+    tcpSocket:
+      port: phpfpm
+    initialDelaySeconds: 10
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 120
 
 # Settings for mariadb for the moodle database
 mariadb:
@@ -80,11 +94,24 @@ mariadb:
     periodSeconds: 10
     successThreshold: 1
     failureThreshold: 20
+  startupProbe:
+    exec:
+      command: ["/usr/local/bin/healthcheck.sh", "--connect", "--innodb_initialized"]
+    initialDelaySeconds: 10
+    timeoutSeconds: 5
+    periodSeconds: 5
+    successThreshold: 1
+    failureThreshold: 120
 
 nginx:
   image: 
     repository: nginx
     tag: 1.27-alpine3.21
+  # Wait for phpfpm to be ready before starting nginx
+  initContainers:
+    - name: wait-for-phpfpm
+      image: busybox
+      command: ['sh', '-c', 'while ! nc -z phpfpm 9000; do sleep 2; done;']
   volumeMounts:
     - name: etc
       mountPath: /etc/nginx/nginx.conf
@@ -104,19 +131,26 @@ nginx:
     - name: moodledata 
       +: "equiz.moodledata"
   livenessProbe:
-    httpGet:
-      path: /
+    tcpSocket:
       port: http
-    initialDelaySeconds: 30
+    initialDelaySeconds: 15
     periodSeconds: 10
+    timeoutSeconds: 3
     failureThreshold: 50
   readinessProbe:
-    httpGet:
-      path: /
+    tcpSocket:
       port: http
     initialDelaySeconds: 5
-    periodSeconds: 10
-    failureThreshold: 50
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 12
+  startupProbe:
+    tcpSocket:
+      port: http
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 60
 
 # Settings for the jobe server for coderunner
 redis:
@@ -152,6 +186,16 @@ redis:
     timeoutSeconds: 5
     successThreshold: 1
     failureThreshold: 50
+  startupProbe:
+    exec:
+      command: 
+        - redis-cli
+        - ping
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    timeoutSeconds: 3
+    successThreshold: 1
+    failureThreshold: 60
 
 # Settings for the jobe server for coderunner
 jobe:
@@ -185,6 +229,15 @@ jobe:
     timeoutSeconds: 5
     successThreshold: 1
     failureThreshold: 50
+  startupProbe:
+    httpGet:
+      path: /
+      port: http
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    timeoutSeconds: 3
+    successThreshold: 1
+    failureThreshold: 60
 
 # Setting for goemaxima
 goemaxima:
@@ -216,6 +269,14 @@ goemaxima:
     initialDelaySeconds: 5
     periodSeconds: 10
     failureThreshold: 6
+  startupProbe:
+    httpGet:
+      path: /goemaxima/
+      port: http
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 60
 
 etc:
   mycnf: ""
