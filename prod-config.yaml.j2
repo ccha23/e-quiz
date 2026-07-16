@@ -415,14 +415,7 @@ etc:
         location ~ [^/]\.php(/|$) {
             fastcgi_split_path_info  ^(.+\.php)(/.*)$;
             fastcgi_index            index.php;
-            # Use variable + resolver so nginx re-resolves the phpfpm pod IP
-            # on each request (pods get new IPs on restart; static fastcgi_pass
-            # caches the old IP and causes 502 Connection Refused).
-            # Must use FQDN — nginx resolver does not honor resolv.conf search domains.
-            # PHPFPM_NAMESPACE is replaced by Helm with .Release.Namespace at deploy time.
-            resolver 10.152.183.10 valid=5s;
-            set $phpfpm_upstream "phpfpm.PHPFPM_NAMESPACE.svc.cluster.local:9000";
-            fastcgi_pass             $phpfpm_upstream; 
+            fastcgi_pass             phpfpm:9000; 
             
             include                  fastcgi_params;
             fastcgi_param   PATH_INFO       $fastcgi_path_info;

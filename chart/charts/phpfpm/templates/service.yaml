@@ -5,7 +5,6 @@ metadata:
   labels:
     {{- include "phpfpm.labels" . | nindent 4 }}
 spec:
-  clusterIP: None
   ports:
     - port: {{ .Values.service.port }}
       targetPort: phpfpm
