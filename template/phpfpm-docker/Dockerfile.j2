@@ -71,7 +71,7 @@ RUN apk add --no-cache --virtual .build-deps \
     && rm -rf /tmp/pear/*
 
 
-RUN apk add --no-cache bash && \
+RUN apk add --no-cache bash git openssh-client && \
     # See https://moodle.org/plugins/pluginversions.php?id=522
     #     https://github.com/tmuras/moosh/tags
     url='https://moodle.org/plugins/download.php/39220/moosh_moodle51_2025121901.zip' \
