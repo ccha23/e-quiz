@@ -74,9 +74,12 @@ RUN apk add --no-cache --virtual .build-deps \
 RUN apk add --no-cache bash git openssh-client && \
     # See https://moodle.org/plugins/pluginversions.php?id=522
     #     https://github.com/tmuras/moosh/tags
-    url='https://moodle.org/plugins/download.php/39220/moosh_moodle51_2025121901.zip' \
+    # moodle.org blocks wget/curl with 403 (Cloudflare). Use GitHub release instead.
+    url='https://github.com/tmuras/moosh/archive/refs/tags/1.27.tar.gz' \
     dir='/opt' \
-    && tmp="/tmp/$(basename $url)" && wget -O $tmp $url && unzip -q -o $tmp -d $dir && rm $tmp \
+    && tmp="/tmp/moosh.tgz" && wget -O $tmp $url \
+    && mkdir -p /tmp/moosh-src && tar xzf $tmp -C /tmp/moosh-src --strip-components=1 && rm $tmp \
+    && mv /tmp/moosh-src "$dir/moosh" && rm -rf /tmp/moosh-src \
     && chown -R www-data:www-data "$dir/moosh" && ln -s "$dir/moosh/moosh.php" "/usr/local/bin/moosh"
 
 FROM prod AS init

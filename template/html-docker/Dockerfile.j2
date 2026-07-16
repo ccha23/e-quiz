@@ -1,7 +1,11 @@
 FROM alpine:3.23.4
 
 # Add tools
-RUN apk add --no-cache wget git curl bash patch zip unzip rsync
+RUN apk add --no-cache wget git curl bash patch zip unzip rsync php83-cli php83-phar php83-openssl php83-mbstring php83-ctype php83-tokenizer php83-fileinfo
+
+# Install Composer (PHP dependency manager)
+RUN ln -sf /usr/bin/php83 /usr/bin/php && \
+    curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 # Fix permission
 RUN /bin/sh -c set -eux; adduser -u 82 -D -S -G www-data www-data && \
@@ -14,6 +18,14 @@ WORKDIR /var/www/html
 # Get moodle
 COPY --chmod=755 bin/get_moodle.sh /usr/local/sbin/
 RUN get_moodle.sh
+
+# Install Composer dependencies (vendor/) so the Moodle Router (r.php / Slim)
+# can initialize. Without this, environment checks report:
+#   - "Composer installed data not found"
+#   - "Router not configured"
+# Platform requirements are ignored because the build image (html-docker) only has
+# a minimal PHP CLI; the runtime phpfpm image has all required extensions.
+RUN composer install --no-dev --classmap-authoritative --no-interaction --ignore-platform-reqs
 
 # Get moodle plugins
 {%- with p = plugins %}

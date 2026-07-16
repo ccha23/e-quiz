@@ -33,6 +33,9 @@ content=$(cat <<'EEOF'
 
 # Additional Moodle configurations
 
+# The router (r.php) is configured — nginx falls through to r.php via try_files
+$CFG->routerconfigured = true;
+
 # X-Sendfile feature
 $CFG->xsendfile = 'X-Accel-Redirect';
 $CFG->xsendfilealiases = array(

@@ -1,14 +1,14 @@
 #!/bin/bash
 
-# Download Moodle and extract it from the official download page.
-# The official .tgz bundles vendor/ (Composer dependencies) and composer.json,
-# which GitHub source tags do not include. Without vendor/ the Moodle Router
-# (r.php / Slim) cannot initialize, and the environment checks report:
+# Download Moodle source from GitHub tag and install Composer dependencies.
+# GitHub source tags include composer.json but NOT vendor/.
+# We run `composer install` to generate vendor/ so the Moodle Router (r.php / Slim)
+# can initialize, fixing environment checks:
 #   - "Composer installed data not found"
 #   - "Router not configured"
-# See https://download.moodle.org/releases/latest/
-#     https://github.com/moodle/moodle/tags
+# See https://github.com/moodle/moodle/tags
+#     https://download.moodle.org/releases/latest/
 wget -O /tmp/moodle.tgz \
-https://download.moodle.org/download.php/direct/stable52/moodle-5.2.1.tgz \
+https://github.com/moodle/moodle/archive/refs/tags/v5.2.1.tar.gz \
 && tar -zxf /tmp/moodle.tgz -C /var/www/html --strip-components=1 \
 && rm /tmp/moodle.tgz
