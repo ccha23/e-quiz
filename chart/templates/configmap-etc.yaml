@@ -31,9 +31,9 @@ data:
     {{- end }}
   nginx-site.conf: |-
     {{- if .Values.etc.nginxSite }}
-    {{- .Values.etc.nginxSite | nindent 4 }}
+    {{- .Values.etc.nginxSite | replace "PHPFPM_NAMESPACE" .Release.Namespace | nindent 4 }}
     {{- else }}
-    {{- .Files.Get "etc/nginx-site.conf" | nindent 4 }}
+    {{- .Files.Get "etc/nginx-site.conf" | replace "PHPFPM_NAMESPACE" .Release.Namespace | nindent 4 }}
     {{- end }}
   config.php: |-
     {{- if .Values.etc.configphp }}
