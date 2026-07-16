@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-07-16
+
+### Fixed
+- **nginx config** — `fastcgi_pass phpfpm:9000` now uses plain service name.
+  Previous attempt to use nginx `resolver` directive with FQDN
+  (`phpfpm.<namespace>.svc.cluster.local`) was reverted — it hardcoded the
+  cluster domain and namespace. The headless service (`clusterIP: None`) is
+  retained; nginx caches the pod IP at startup. Restart the nginx pod if
+  `phpfpm-0` is restarted.
+
 ## [0.4.0] - 2026-07-16
 
 ### Added
