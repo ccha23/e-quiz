@@ -7,18 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.2] - 2026-07-25
+
 ### Fixed
-- **nginx 502 on phpfpm pod recreation** — Two-part fix for the recurring
-  502 outages when phpfpm-0 is recreated (new pod IP):
-  - Added `resolver 10.152.183.10 valid=5s` + `set $upstream_phpfpm phpfpm`
-    to nginx config. nginx now re-resolves the phpfpm DNS every 5 seconds
-    instead of caching the pod IP forever. This is required because the
-    phpfpm service is headless (`clusterIP: None`) — DNS returns the pod
-    IP directly, which changes on pod recreation.
-  - Changed nginx liveness/readiness probes from `tcpSocket` (only checks
-    if port 80 is open) to `httpGet /login/index.php` (checks the full
-    nginx → PHP-FPM chain). When phpfpm is unreachable, nginx returns 502,
-    the probe fails, and k8s restarts nginx (which re-resolves DNS).
+- **nginx 502 on phpfpm pod recreation** — The nginx liveness/readiness
+  probes were `tcpSocket` (only checked if port 80 was open), so nginx
+  reported healthy even when returning 502 to all clients. Changed to
+  `httpGet /login/index.php` which checks the full nginx → PHP-FPM chain.
+  When phpfpm is unreachable, nginx returns 502, the probe fails, and k8s
+  auto-restarts nginx (which re-resolves the phpfpm DNS via resolv.conf
+  search domains → picks up the new pod IP).
+  
+  Note: An nginx `resolver` + variable approach was also attempted but
+  reverted — nginx's resolver directive does NOT honor resolv.conf search
+  domains, so the bare name `phpfpm` can't be resolved. Using the FQDN
+  would hardcode the namespace, which conflicts with the chart's
+  namespace-agnostic design.
 
 ## [0.4.1] - 2026-07-16
 
