@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **nginx 502 on phpfpm pod recreation** — Two-part fix for the recurring
+  502 outages when phpfpm-0 is recreated (new pod IP):
+  - Added `resolver 10.152.183.10 valid=5s` + `set $upstream_phpfpm phpfpm`
+    to nginx config. nginx now re-resolves the phpfpm DNS every 5 seconds
+    instead of caching the pod IP forever. This is required because the
+    phpfpm service is headless (`clusterIP: None`) — DNS returns the pod
+    IP directly, which changes on pod recreation.
+  - Changed nginx liveness/readiness probes from `tcpSocket` (only checks
+    if port 80 is open) to `httpGet /login/index.php` (checks the full
+    nginx → PHP-FPM chain). When phpfpm is unreachable, nginx returns 502,
+    the probe fails, and k8s restarts nginx (which re-resolves DNS).
+
 ## [0.4.1] - 2026-07-16
 
 ### Fixed

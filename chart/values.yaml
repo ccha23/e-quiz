@@ -130,27 +130,33 @@ nginx:
       +: "equiz.html"
     - name: moodledata 
       +: "equiz.moodledata"
+  # Probes use httpGet (not tcpSocket) so they detect 502 when phpfpm is
+  # unreachable. A 502/503 response fails the probe → k8s restarts nginx →
+  # DNS is re-resolved → fresh phpfpm pod IP. Without this, nginx reports
+  # healthy (port 80 open) while returning 502 to all clients indefinitely.
   livenessProbe:
-    tcpSocket:
+    httpGet:
+      path: /login/index.php
       port: http
     initialDelaySeconds: 15
     periodSeconds: 10
-    timeoutSeconds: 3
-    failureThreshold: 50
+    timeoutSeconds: 5
+    failureThreshold: 6       # 6 × 10s = 60s before restart
   readinessProbe:
-    tcpSocket:
+    httpGet:
+      path: /login/index.php
       port: http
     initialDelaySeconds: 5
     periodSeconds: 5
     timeoutSeconds: 3
-    failureThreshold: 12
+    failureThreshold: 3       # 3 × 5s = 15s to pull from ingress
   startupProbe:
     tcpSocket:
       port: http
     initialDelaySeconds: 5
     periodSeconds: 5
     timeoutSeconds: 3
-    failureThreshold: 60
+    failureThreshold: 60      # startup just needs nginx listening
 
 # Settings for the jobe server for coderunner
 redis:

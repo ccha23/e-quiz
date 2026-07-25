@@ -415,7 +415,10 @@ etc:
         location ~ [^/]\.php(/|$) {
             fastcgi_split_path_info  ^(.+\.php)(/.*)$;
             fastcgi_index            index.php;
-            fastcgi_pass             phpfpm:9000; 
+            # Re-resolve phpfpm DNS every 5s (headless service → pod IP changes)
+            resolver 10.152.183.10 valid=5s;
+            set $upstream_phpfpm phpfpm;
+            fastcgi_pass             $upstream_phpfpm:9000;
             
             include                  fastcgi_params;
             fastcgi_param   PATH_INFO       $fastcgi_path_info;
