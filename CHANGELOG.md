@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.4] - 2026-08-10
+
+### Fixed
+
+#### SSE streaming broken through ingress-nginx
+- **`proxy-buffering` enabled by default** in ingress-nginx caused Server-Sent
+  Events (SSE) responses from the Hermes Agent chat to be buffered at the
+  ingress layer. The browser's `EventSource` received nothing until the
+  connection closed, so the chat showed empty assistant bubbles even though
+  the bridge was running and responding.
+- **Fix:** Set `nginx.ingress.kubernetes.io/proxy-buffering: "off"` as a
+  default annotation in the nginx subchart values. This ensures SSE responses
+  are streamed to the browser in real-time without buffering.
+
 ## [0.4.3] - 2026-08-09
 
 ### Fixed
