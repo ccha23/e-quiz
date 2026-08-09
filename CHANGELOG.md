@@ -7,6 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.3] - 2026-08-09
+
+### Fixed
+
+#### Moodle cron false "not been run" warning
+- **`cron_last` never updated** — Moodle 5.x `admin/cli/cron.php` does NOT set
+  the legacy `cron_last` config setting. The admin dashboard warning ("cron has
+  not been run for X days") checks this value, but it was never written. Fixed
+  by adding `cron-post.php` — a small PHP script that runs after `cron.php` and
+  calls `set_config('cron_last', time())`.
+- **`cron_keepalive=180` blocking job exit** — Moodle 5.x defaults the cron
+  keep-alive loop to 180 seconds. The K8s CronJob pod ran for 3 minutes before
+  being killed, preventing any post-cron commands from executing.
+  `cron-post.php` sets `cron_keepalive=0` so `cron.php` exits immediately after
+  running tasks (sub-second completion instead of 3-minute loop).
+- **H5P content types task blocking cron** — `core\task\h5p_get_content_types_task`
+  fetches from `h5p.org/sites/default/files/h5p/content-types.json`, which now
+  returns 404. The task threw `invalid_response_exception` on every run, blocking
+  all subsequent scheduled tasks. `cron-post.php` disables this task (0 H5P
+  content on both instances; libraries can be uploaded manually if needed).
+
+### Added
+- `e-quiz/chart/etc/cron-post.php` — post-cron PHP script that sets
+  `cron_last`, `cron_keepalive=0`, and disables the H5P task.
+- `e-quiz/chart/templates/configmap-etc.yaml` — added `cron-post.php` entry
+  to the `etc` ConfigMap.
+- `e-quiz/chart/templates/cronjob.yaml` — cron container command now calls
+  `php /etc/moodle/cron-post.php` after `cron.php`; added volumeMount for
+  `cron-post.php` via subPath.
+
 ## [0.4.2] - 2026-07-25
 
 ### Fixed

@@ -53,3 +53,5 @@ data:
     {{- else }}
     {{- .Files.Get "etc/forcedcache.json" | nindent 4 }}
     {{- end }}
+  cron-post.php: |-
+    {{- .Files.Get "etc/cron-post.php" | nindent 4 }}

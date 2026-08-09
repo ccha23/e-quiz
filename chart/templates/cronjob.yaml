@@ -24,9 +24,12 @@ spec:
             - /bin/sh
             - www-data
             - -c
-            - if nc -z phpfpm 9000; then php /var/www/html/admin/cli/cron.php; fi
+            - if nc -z phpfpm 9000; then php /var/www/html/admin/cli/cron.php; php /etc/moodle/cron-post.php; fi
             volumeMounts:
             {{- include "equiz.phpfpm.volumeMounts" . | nindent 12 }}
+            - name: etc
+              mountPath: /etc/moodle/cron-post.php
+              subPath: cron-post.php
           - name: moodle-adhoc
             image: "{{ .Values.phpfpm.image.repository }}:{{ .Values.phpfpm.image.tag | default .Subcharts.phpfpm.AppVersion }}"
             imagePullPolicy: {{ .Values.phpfpm.image.pullPolicy }}
