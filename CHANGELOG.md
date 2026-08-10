@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.5] - 2026-08-10
+
+### Fixed
+
+#### moosh plugin-list returns nothing
+- **Missing `vendor/autoload.php`**: moosh 1.27 GitHub release tarball does not
+  include Composer dependencies. Added `composer install` to the phpfpm
+  Dockerfile so `vendor/autoload.php` is generated at image build time.
+- **403 Forbidden from `download.moodle.org`**: PHP's `file_get_contents()`
+  sends no `User-Agent` header by default, and moodle.org blocks requests
+  without one. Added `user_agent = "Moosh/1.27 (Moodle)"` to php.ini in
+  `chart/etc/php.ini` (chart default) and `template/phpfpm-docker/etc/php.ini`.
+  The runtime php.ini is served via ConfigMap from `.Values.etc.php`.
+
+#### Image registry migrated from localhost:32000 to registry.dive4dec
+- `localhost:32000` (MicroK8s built-in registry) is only accessible from the
+  node running the registry. Switched to `registry.dive4dec` (ClusterIP service)
+  so images can be pulled from any node in the cluster, enabling pod migration
+  during node drain.
+
 ## [0.4.4] - 2026-08-10
 
 ### Fixed
