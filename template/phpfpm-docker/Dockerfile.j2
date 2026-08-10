@@ -83,7 +83,10 @@ RUN apk add --no-cache bash git openssh-client && \
     && chown -R www-data:www-data "$dir/moosh" && ln -s "$dir/moosh/moosh.php" "/usr/local/bin/moosh" \
     && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
     && cd "$dir/moosh" && composer install --no-dev --no-interaction --ignore-platform-reqs \
-    && chown -R www-data:www-data "$dir/moosh/vendor"
+    && chown -R www-data:www-data "$dir/moosh/vendor" \
+    # Patch moosh PluginList.php to send a User-Agent header when fetching
+    # plugins.json from download.moodle.org (otherwise returns 403).
+    && sed -i 's|file_get_contents(self::$APIURL, false, PluginDownload::createProxyContext($this->expandedOptions))|file_get_contents(self::$APIURL, false, stream_context_create(array("http" => array("header" => "User-Agent: Moosh/1.27 (Moodle)\\r\\n"), "ssl" => array("verify_peer" => true, "verify_peer_name" => true))))|' "$dir/moosh/Moosh/Command/Generic/Plugin/PluginList.php"
 
 FROM prod AS init
 
