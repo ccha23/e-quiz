@@ -80,7 +80,10 @@ RUN apk add --no-cache bash git openssh-client && \
     && tmp="/tmp/moosh.tgz" && wget -O $tmp $url \
     && mkdir -p /tmp/moosh-src && tar xzf $tmp -C /tmp/moosh-src --strip-components=1 && rm $tmp \
     && mv /tmp/moosh-src "$dir/moosh" && rm -rf /tmp/moosh-src \
-    && chown -R www-data:www-data "$dir/moosh" && ln -s "$dir/moosh/moosh.php" "/usr/local/bin/moosh"
+    && chown -R www-data:www-data "$dir/moosh" && ln -s "$dir/moosh/moosh.php" "/usr/local/bin/moosh" \
+    && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
+    && cd "$dir/moosh" && composer install --no-dev --no-interaction --ignore-platform-reqs \
+    && chown -R www-data:www-data "$dir/moosh/vendor"
 
 FROM prod AS init
 
