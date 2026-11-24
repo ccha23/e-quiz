@@ -3,7 +3,33 @@ entries:
   equiz:
   - apiVersion: v2
     appVersion: 0.5.0
-    created: "2026-08-24T09:24:13.642931696Z"
+    created: "2026-11-24T12:23:41.102217398Z"
+    dependencies:
+    - name: nginx
+      repository: ""
+    - name: mariadb
+      repository: ""
+    - name: phpfpm
+      repository: ""
+    - condition: jobe.enabled
+      name: jobe
+      repository: ""
+    - condition: redis.enabled
+      name: redis
+      repository: ""
+    - condition: goemaxima.enabled
+      name: goemaxima
+      repository: ""
+    description: E-Quiz Helm chart for Kubernetes
+    digest: 9b6c91350f4cc4393818e33a6b11827199c4bc94db1f6259c8442ae552f41836
+    name: equiz
+    type: application
+    urls:
+    - https://ccha23.github.io/e-quiz/equiz-0.5.1.tgz
+    version: 0.5.1
+  - apiVersion: v2
+    appVersion: 0.5.0
+    created: "2026-11-24T12:23:41.099821466Z"
     dependencies:
     - name: nginx
       repository: ""
@@ -29,7 +55,7 @@ entries:
     version: 0.5.0
   - apiVersion: v2
     appVersion: 0.4.5
-    created: "2026-08-24T09:24:13.639632833Z"
+    created: "2026-11-24T12:23:41.097007133Z"
     dependencies:
     - name: nginx
       repository: ""
@@ -55,7 +81,7 @@ entries:
     version: 0.4.5
   - apiVersion: v2
     appVersion: 0.4.4
-    created: "2026-08-24T09:24:13.636840887Z"
+    created: "2026-11-24T12:23:41.09466336Z"
     dependencies:
     - name: nginx
       repository: ""
@@ -81,7 +107,7 @@ entries:
     version: 0.4.4
   - apiVersion: v2
     appVersion: 0.4.3
-    created: "2026-08-24T09:24:13.633123412Z"
+    created: "2026-11-24T12:23:41.091733323Z"
     dependencies:
     - name: nginx
       repository: ""
@@ -107,7 +133,7 @@ entries:
     version: 0.4.3
   - apiVersion: v2
     appVersion: 0.4.2
-    created: "2026-08-24T09:24:13.630235427Z"
+    created: "2026-11-24T12:23:41.089398873Z"
     dependencies:
     - name: nginx
       repository: ""
@@ -133,7 +159,7 @@ entries:
     version: 0.4.2
   - apiVersion: v2
     appVersion: 0.4.0
-    created: "2026-08-24T09:24:13.626372286Z"
+    created: "2026-11-24T12:23:41.086814318Z"
     dependencies:
     - name: nginx
       repository: ""
@@ -159,7 +185,7 @@ entries:
     version: 0.4.0
   - apiVersion: v2
     appVersion: 0.3.0
-    created: "2026-08-24T09:24:13.623489358Z"
+    created: "2026-11-24T12:23:41.083973074Z"
     dependencies:
     - name: nginx
       repository: ""
@@ -185,7 +211,7 @@ entries:
     version: 0.3.0
   - apiVersion: v2
     appVersion: 0.2.0
-    created: "2026-08-24T09:24:13.619862009Z"
+    created: "2026-11-24T12:23:41.081594028Z"
     dependencies:
     - name: nginx
       repository: ""
@@ -211,7 +237,7 @@ entries:
     version: 0.2.0
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2026-08-24T09:24:13.617092824Z"
+    created: "2026-11-24T12:23:41.078432041Z"
     dependencies:
     - name: nginx
       repository: ""
@@ -235,4 +261,4 @@ entries:
     urls:
     - https://ccha23.github.io/e-quiz/equiz-0.1.0.tgz
     version: 0.1.0
-generated: "2026-08-24T09:24:13.612874345Z"
+generated: "2026-11-24T12:23:41.075834896Z"
