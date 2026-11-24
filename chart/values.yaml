@@ -212,8 +212,11 @@ jobe:
   enabled: false
   fullnameOverride: "jobe"
   image: 
-    repository: trampgeek/jobeinabox
-    tag: latest
+    # 2026-11-24: default hardened to our fork 1.0.2 (PHP pinned to the
+    # CVE-2026-* patched Ubuntu backport 8.5.4-0ubuntu1.6). Upstream
+    # trampgeek/jobeinabox:latest runs unpatched PHP 8.5.4-0ubuntu1.2.
+    repository: registry.dive4dec/jobeinabox
+    tag: "1.0.2"
   volumeMounts:
     - name: etc
       mountPath: "/var/www/html/jobe/application/config/config.php"
